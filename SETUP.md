@@ -1,5 +1,7 @@
 # Putting 1 Bell online with accounts
 
+**Live now:** <https://1bellworkout.github.io/>. It's hosted from the GitHub repository `1bellworkout/1bellworkout.github.io` (in the `1bellworkout` organization), with Supabase project `dbyffaqhdtqulfximmaq`. The steps below are for setting it up from scratch. With an organization repository named `<org>.github.io`, the app is served at the root of that address.
+
 The code is ready. What's left are accounts only you can create: a free Supabase project (sign-in and data) and a free GitHub repo (hosting). This takes about 20–30 minutes.
 
 ## 1. Supabase (sign-in + database)
