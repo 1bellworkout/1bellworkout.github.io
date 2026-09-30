@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>1 Bell</title>
+<meta name="theme-color" content="#E9EBE6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171A" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="1 Bell">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Public+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<section class="auth" id="auth" hidden aria-labelledby="authTitle">
+  <div class="auth-in">
+    <div class="brand"><b>1 Bell</b><span>30&nbsp;lb kettlebell · 20–30&nbsp;min</span></div>
+    <div class="card stack">
+      <h1 id="authTitle" style="font-size:40px">Sign in</h1>
+      <form class="stack" id="authStep1">
+        <label class="stack" style="gap:6px"><span class="eyebrow">Email</span>
+          <input type="email" id="authEmail" autocomplete="email" inputmode="email" required placeholder="you@example.com">
+        </label>
+        <button class="btn-go" type="submit">Email me a sign-in code</button>
+        <p class="note" style="margin:0">No password needed. New here? This creates your account. Your schedule and history are private to you.</p>
+      </form>
+      <form class="stack" id="authStep2" hidden>
+        <p style="margin:0">We sent a sign-in email to <b id="authSent"></b>. Tap the link in it, or type the code here.</p>
+        <label class="stack" style="gap:6px"><span class="eyebrow">Code</span>
+          <input id="authCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" class="num">
+        </label>
+        <button class="btn-go" type="submit">Sign in</button>
+        <button class="btn-sm" type="button" id="authBack">Use a different email</button>
+      </form>
+      <p class="auth-msg" id="authMsg" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><b>1 Bell</b><span>30&nbsp;lb kettlebell · 20–30&nbsp;min</span></div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button role="tab" id="tab-today" aria-selected="true" data-v="today">Today</button>
+      <button role="tab" id="tab-sched" aria-selected="false" data-v="sched">Schedule</button>
+      <button role="tab" id="tab-moves" aria-selected="false" data-v="moves">Moves</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="view" id="v-today">
+    <div class="today">
+      <div>
+        <div class="stage" id="heroStage">
+          <div class="cap"><b id="heroName">Two-Hand Swing</b><span id="heroTag">Tap a move to preview</span></div>
+        </div>
+        <div class="coach card" style="padding:14px 16px">
+          <div class="row" style="justify-content:space-between"><span class="eyebrow">Choose your coach</span><span class="note" id="coachNote"></span></div>
+          <div class="chips" id="coachChips"></div>
+          <div class="swatches" id="skinSw"></div>
+        </div>
+      </div>
+      <div class="card session">
+        <div class="eyebrow" id="sessEyebrow">Up next</div>
+        <h1 id="sessTitle">Hinge Day</h1>
+        <p class="focus" id="sessFocus"></p>
+        <div class="row" style="justify-content:space-between">
+          <div class="seg" role="group" aria-label="Session length">
+            <button id="d20" aria-pressed="true" data-d="20">20 min</button>
+            <button id="d30" aria-pressed="false" data-d="30">30 min</button>
+          </div>
+          <span class="spec num" id="sessSpec"></span>
+        </div>
+        <ol class="moves" id="sessMoves"></ol>
+        <button class="btn-go" id="startBtn">Start workout</button>
+        <div style="margin-top:14px">
+          <div class="eyebrow" style="margin-bottom:6px">Pick a different workout</div>
+          <div class="pick" id="pickW"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <h2 style="font-size:26px">This week</h2>
+        <span class="note" id="weekNote"></span>
+      </div>
+      <div class="week" id="weekStrip"></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-sched" hidden>
+    <div class="sched">
+      <div class="card">
+        <div class="cal-h">
+          <button id="calPrev" aria-label="Previous month">‹</button>
+          <h2 id="calTitle">September 2026</h2>
+          <button id="calNext" aria-label="Next month">›</button>
+        </div>
+        <div class="cal" id="cal"></div>
+        <div class="legend">
+          <span><i style="border:1px dashed var(--ink)"></i>Planned</span>
+          <span><i style="background:var(--done)"></i>Done (letter = workout)</span>
+          <span><i style="box-shadow:0 0 0 2px var(--signal)"></i>Today</span>
+        </div>
+        <p class="note" style="margin:10px 0 0">Tap a past or current day to mark it done or undo it.</p>
+      </div>
+      <div class="stack">
+        <div class="card stack">
+          <h2 style="font-size:24px">Workout days</h2>
+          <div class="chips" id="dayChips"></div>
+          <p class="note" style="margin:0">Three non-consecutive days is a good start with one bell. Workouts rotate A → E, so each session is different from the last.</p>
+          <div class="row"><span class="eyebrow">Default length</span>
+            <div class="seg" role="group" aria-label="Default length">
+              <button id="dd20" aria-pressed="true" data-d="20">20 min</button>
+              <button id="dd30" aria-pressed="false" data-d="30">30 min</button>
+            </div>
+          </div>
+        </div>
+        <div class="card stack">
+          <div class="stats">
+            <div class="stat"><b class="num" id="stWeek">0</b><span>this week</span></div>
+            <div class="stat"><b class="num" id="stMonth">0</b><span>this month</span></div>
+            <div class="stat"><b class="num" id="stMin">0</b><span>total minutes</span></div>
+          </div>
+          <h3 style="font-size:20px">History</h3>
+          <ul class="hist" id="hist"></ul>
+          <p class="note" id="saveNote" style="margin:0"></p>
+        </div>
+        <div class="card" id="acctCard" hidden>
+          <div class="row" style="justify-content:space-between">
+            <div style="min-width:0"><div class="eyebrow">Signed in as</div><div id="acctEmail" style="font-weight:600;overflow-wrap:anywhere"></div></div>
+            <button class="btn-sm" id="signOut">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-moves" hidden>
+    <div class="row" style="justify-content:space-between">
+      <h2 style="font-size:34px">Move library</h2>
+      <span class="note">Every move uses one 30&nbsp;lb (13.6&nbsp;kg) kettlebell or just your body.</span>
+    </div>
+    <div class="lib" id="lib"></div>
+  </section>
+</main>
+
+<div class="player" id="player" hidden>
+  <div class="p-in" id="pIn">
+    <div class="p-top">
+      <div class="eyebrow" id="pTitle"><b>Workout</b></div>
+      <button class="p-x" id="pEnd">End workout</button>
+    </div>
+    <div class="bar" id="pBar"></div>
+    <div class="p-main" id="pMain">
+      <div class="p-stage" id="pStage"><span class="p-phase" id="pPhase">Work</span><span class="p-side" id="pSide" hidden>Switch sides</span></div>
+      <div class="p-info">
+        <div class="p-round num" id="pRound"></div>
+        <h2 id="pName">Swing</h2>
+        <div class="clock">
+          <svg class="ring" viewBox="0 0 132 132" aria-hidden="true">
+            <circle class="bgc" cx="66" cy="66" r="56"/>
+            <circle class="fg" id="pRing" cx="66" cy="66" r="56" stroke-dasharray="351.86" stroke-dashoffset="0" transform="rotate(-90 66 66)"/>
+            <text id="pTime" x="66" y="82" text-anchor="middle">40</text>
+          </svg>
+          <div class="p-next" id="pNext"></div>
+        </div>
+        <ul class="p-cues" id="pCues"></ul>
+        <div class="toggles">
+          <label><input type="checkbox" id="optBeep" checked> Beeps</label>
+          <label><input type="checkbox" id="optVoice" checked> Voice cues</label>
+        </div>
+      </div>
+    </div>
+    <div class="p-ctl" id="pCtl">
+      <button id="pPrev">‹ Back</button>
+      <button class="pp" id="pPause">Pause</button>
+      <button id="pSkip">Skip ›</button>
+    </div>
+  </div>
+  <div class="p-in" id="pDone" hidden>
+    <div class="finish">
+      <span class="eyebrow">Session complete</span>
+      <h2 id="fTitle">Nice work.</h2>
+      <p id="fText" style="margin:0;max-width:52ch"></p>
+      <div class="row">
+        <button class="btn-go" style="width:auto" id="fClose">Back to Today</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
