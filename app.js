@@ -586,7 +586,7 @@ function adopt(user){
   uid = user.id; userEmail = user.email || '';
   lsSet(LSK + '-uid', uid); lsSet(LSK + '-email', userEmail);
   if (!same){ state = cleanState(parse(lsGet(ck())) || DEFAULT); dur = state.dur; chosen = null; preview = null; pulled = false; }
-  gate(false); renderAll();
+  gate(recovering); renderAll();
   if (!pulled) pull();
 }
 function dropAccount(){
@@ -594,6 +594,7 @@ function dropAccount(){
   lsDel(LSK + '-uid'); lsDel(LSK + '-email');
   uid = null; userEmail = ''; pulled = false; storeMode = 'pending';
   state = cleanState(DEFAULT); dur = state.dur; chosen = null; preview = null;
+  if (recovering) showReset(false);
   gate(true); renderAll();
 }
 async function signOut(){
@@ -609,7 +610,8 @@ function startAuth(){
   wireAuth();
   if (!sb){ gate(!uid); if (!uid) authMsg('Can’t reach the sign-in service. Check your connection and reload.'); return; }
   gate(!uid);
-  if (authErr){ authMsg(authErr + ' Request a new link below.'); history.replaceState(null, '', location.pathname + location.search); }
+  if (authErr){ authMsg(authErr + ' If this was a password reset, tap “Forgot password?” again for a new link.'); history.replaceState(null, '', location.pathname + location.search); }
+  let resetLink = /type=recovery/.test(location.hash);
   sb.auth.onAuthStateChange((ev, session) => {
     // Supabase advises against awaiting its own calls inside this callback, so defer the work.
     setTimeout(() => {
@@ -617,6 +619,7 @@ function startAuth(){
       if (u){
         if (/access_token=/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
         adopt(u);
+        if (ev === 'PASSWORD_RECOVERY' || resetLink){ resetLink = false; showReset(true); }
       } else if (ev === 'SIGNED_OUT' || (ev === 'INITIAL_SESSION' && navigator.onLine)){
         if (uid) dropAccount(); else gate(true);
       }
@@ -627,31 +630,66 @@ function startAuth(){
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && uid && !P){ pulled = false; pull(); } });
 }
 
-/* Sign-in screen: email → magic link + 6-digit code. The code matters on iPhone, where a
-   home-screen app doesn't share storage with Safari, so opening the link signs in Safari instead. */
-let authEmail = '';
+/* Sign-in screen: email + password, with "Create account" and "Forgot password?". Password
+   sign-in happens inside the page, so it works in an iPhone home-screen app (which doesn't share
+   storage with Safari). A reset link opens wherever the email is tapped; set the new password
+   there, then sign in with it anywhere. */
+let authMode = 'in', recovering = false;
+const HERE = () => location.origin + location.pathname;
 function authMsg(t, ok){ const m = $('authMsg'); m.textContent = t || ''; m.classList.toggle('ok', !!ok); }
 function gate(on){ document.body.classList.toggle('gate', on); $('auth').hidden = !on; }
+function friendly(err){
+  const m = (err && err.message) || 'Something went wrong. Try again.';
+  if (/invalid login credentials/i.test(m)) return 'That email and password don’t match. Check them, or tap “Forgot password?”.';
+  if (/email not confirmed/i.test(m)) return 'Confirm your email first: open the message we sent and tap the link, then sign in here.';
+  if (/already registered/i.test(m)) return 'There’s already an account with that email. Switch to “Sign in”.';
+  if (/rate limit/i.test(m)) return 'Too many emails sent. Wait a while and try again.';
+  return m;
+}
+function setAuthMode(m){
+  authMode = m;
+  $('authModes').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === m)));
+  $('authTitle').textContent = m === 'up' ? 'Create account' : 'Sign in';
+  $('authGo').textContent = m === 'up' ? 'Create account' : 'Sign in';
+  $('authPass').autocomplete = m === 'up' ? 'new-password' : 'current-password';
+  $('authForgot').hidden = m === 'up';
+  authMsg('');
+}
+function showReset(on){
+  recovering = on;
+  $('authForm').hidden = on; $('authModes').hidden = on; $('authReset').hidden = !on;
+  if (on){ $('authTitle').textContent = 'New password'; $('authResetEmail').textContent = userEmail; authMsg(''); gate(true); $('authNewPass').focus(); }
+  else setAuthMode(authMode);
+}
 function wireAuth(){
-  const step = n => { $('authStep1').hidden = n !== 1; $('authStep2').hidden = n !== 2; };
-  $('authStep1').onsubmit = async e => {
+  $('authModes').querySelectorAll('button').forEach(b => b.onclick = () => setAuthMode(b.dataset.m));
+  $('authForm').onsubmit = async e => {
     e.preventDefault(); if (!sb) return;
-    authEmail = $('authEmail').value.trim(); if (!authEmail) return;
-    const btn = e.submitter || $('authStep1').querySelector('button'); btn.disabled = true; authMsg('Sending…');
-    const {error} = await sb.auth.signInWithOtp({email: authEmail, options: {emailRedirectTo: location.origin + location.pathname}});
+    const email = $('authEmail').value.trim(), password = $('authPass').value;
+    const btn = $('authGo'); btn.disabled = true; authMsg(authMode === 'up' ? 'Creating your account…' : 'Signing in…');
+    const res = authMode === 'up'
+      ? await sb.auth.signUp({email, password, options: {emailRedirectTo: HERE()}})
+      : await sb.auth.signInWithPassword({email, password});
     btn.disabled = false;
-    if (error){ authMsg(error.message); return; }
-    $('authSent').textContent = authEmail; authMsg(''); step(2); $('authCode').value = ''; $('authCode').focus();
+    if (res.error){ authMsg(friendly(res.error)); return; }
+    if (authMode === 'up' && !res.data.session){ setAuthMode('in'); authMsg('Almost done: we emailed you a confirmation link. Tap it, then sign in here with your password.', true); return; }
+    $('authPass').value = ''; authMsg('');
   };
-  $('authStep2').onsubmit = async e => {
+  $('authForgot').onclick = async () => {
+    if (!sb) return;
+    const email = $('authEmail').value.trim();
+    if (!email){ authMsg('Type your email above first, then tap “Forgot password?”.'); $('authEmail').focus(); return; }
+    authMsg('Sending…');
+    const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: HERE()});
+    authMsg(error ? friendly(error) : 'Check your email for a reset link. On iPhone it opens in Safari: set the new password there, then sign in here.', !error);
+  };
+  $('authReset').onsubmit = async e => {
     e.preventDefault(); if (!sb) return;
-    const token = $('authCode').value.replace(/\D/g, ''); if (token.length < 6) { authMsg('Enter the code from the email.'); return; }
-    authMsg('Checking…');
-    const {error} = await sb.auth.verifyOtp({email: authEmail, token, type: 'email'});
-    if (error){ authMsg(error.message); return; }
-    authMsg('Signed in.', true); step(1);
+    authMsg('Saving…');
+    const {error} = await sb.auth.updateUser({password: $('authNewPass').value});
+    if (error){ authMsg(friendly(error)); return; }
+    $('authNewPass').value = ''; showReset(false); gate(false);
   };
-  $('authBack').onclick = () => { authMsg(''); step(1); $('authEmail').focus(); };
   $('signOut').onclick = signOut;
 }
 function renderAcct(){

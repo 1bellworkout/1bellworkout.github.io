@@ -197,7 +197,8 @@ body.gate>.top,body.gate>main{display:none}
 .auth-in{width:100%;max-width:420px;display:grid;gap:16px}
 .auth input{font:inherit;font-size:17px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%}
 .auth input:focus-visible{outline:3px solid var(--signal);outline-offset:1px}
-#authCode{font-size:24px;letter-spacing:.2em}
+.auth .seg{display:flex}
+.auth .seg button{flex:1}
 .auth-msg{margin:0;font-size:14px;color:var(--muted);min-height:1.5em}
 .auth-msg.ok{color:var(--done)}
 .btn-go:disabled{opacity:.6;cursor:progress}

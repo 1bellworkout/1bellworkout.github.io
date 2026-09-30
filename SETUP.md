@@ -10,14 +10,10 @@ The code is ready. What's left are accounts only you can create: a free Supabase
 4. Open **Authentication → URL Configuration**:
    - **Site URL**: `https://YOUR-GITHUB-NAME.github.io/1-bell/`
    - **Redirect URLs**: add that same URL, and `http://localhost:8000/` for local testing.
-5. Open **Authentication → Email Templates**. In both **Magic Link** and **Confirm signup**, add a line with the code, for example:
-
-   ```
-   <p>Or type this code in the app: <b>{{ .Token }}</b></p>
-   ```
-
-   On iPhone you need the code. An app on the home screen doesn't share storage with Safari, so tapping the link signs you in to Safari, not the app.
-6. **Before inviting other people:** Supabase's built-in email sender only delivers to your project's own team members, and only a few emails an hour. To let anyone sign up, open **Authentication → SMTP Settings** (under Emails on some dashboards). Connect a mail service there; [Resend](https://resend.com) has a free tier. It asks you to verify a domain you own. Until then you can test with your own address.
+5. People sign in with an email and password, so the iPhone home-screen app never needs an email link to sign in. Emails are only sent to confirm a new account and to reset a forgotten password.
+6. **Before inviting other people:** Supabase's built-in email sender only delivers to your project's own team members, and only a few emails an hour. There are two options:
+   - Turn off **Authentication → Sign In / Providers → Email → Confirm email**. New accounts then work immediately, with no email. Password-reset emails still only reach team members.
+   - Connect a mail service under **Authentication → Emails → SMTP Settings**. [Resend](https://resend.com) has a free tier, but it asks you to verify a domain you own.
 
 Note: free Supabase projects pause after about a week with no activity. You can resume one from the dashboard.
 
@@ -36,7 +32,7 @@ To make updates easier later, you could install [GitHub Desktop](https://desktop
 
 ## 3. On your phone
 
-- **iPhone:** open the URL in **Safari**, tap **Share → Add to Home Screen**, then open 1 Bell from the new icon. Sign in there by typing the email code.
+- **iPhone:** open the URL in **Safari**, tap **Share → Add to Home Screen**, then open 1 Bell from the new icon and sign in with your email and password.
 - **Android:** open the URL in **Chrome** and tap **Install app** (or **⋮ → Add to Home screen**).
 
 Once it has loaded one time, the app opens and runs workouts offline. Logged sessions sync the next time you're online.

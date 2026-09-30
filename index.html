@@ -24,20 +24,27 @@
     <div class="brand"><b>1 Bell</b><span>30&nbsp;lb kettlebell · 20–30&nbsp;min</span></div>
     <div class="card stack">
       <h1 id="authTitle" style="font-size:40px">Sign in</h1>
-      <form class="stack" id="authStep1">
+      <div class="seg" role="group" aria-label="Sign in or create account" id="authModes">
+        <button type="button" data-m="in" aria-pressed="true">Sign in</button>
+        <button type="button" data-m="up" aria-pressed="false">Create account</button>
+      </div>
+      <form class="stack" id="authForm">
         <label class="stack" style="gap:6px"><span class="eyebrow">Email</span>
-          <input type="email" id="authEmail" autocomplete="email" inputmode="email" required placeholder="you@example.com">
+          <input type="email" id="authEmail" autocomplete="username" inputmode="email" required placeholder="you@example.com">
         </label>
-        <button class="btn-go" type="submit">Email me a sign-in code</button>
-        <p class="note" style="margin:0">No password needed. New here? This creates your account. Your schedule and history are private to you.</p>
+        <label class="stack" style="gap:6px"><span class="eyebrow">Password</span>
+          <input type="password" id="authPass" autocomplete="current-password" required minlength="8">
+        </label>
+        <button class="btn-go" type="submit" id="authGo">Sign in</button>
+        <button class="btn-sm" type="button" id="authForgot">Forgot password?</button>
+        <p class="note" style="margin:0">You stay signed in on this device until you sign out. Your schedule and history are private to you.</p>
       </form>
-      <form class="stack" id="authStep2" hidden>
-        <p style="margin:0">We sent a sign-in email to <b id="authSent"></b>. Tap the link in it, or type the code here.</p>
-        <label class="stack" style="gap:6px"><span class="eyebrow">Code</span>
-          <input id="authCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" class="num">
+      <form class="stack" id="authReset" hidden>
+        <p style="margin:0">Choose a new password for <b id="authResetEmail"></b>.</p>
+        <label class="stack" style="gap:6px"><span class="eyebrow">New password</span>
+          <input type="password" id="authNewPass" autocomplete="new-password" required minlength="8">
         </label>
-        <button class="btn-go" type="submit">Sign in</button>
-        <button class="btn-sm" type="button" id="authBack">Use a different email</button>
+        <button class="btn-go" type="submit">Save password</button>
       </form>
       <p class="auth-msg" id="authMsg" role="status" aria-live="polite"></p>
     </div>
