@@ -35,7 +35,9 @@ This app was first built as a claude.ai artifact and then moved here as a plain 
      - **Local only**: localStorage key `iron-thirty-v1` (the original working name, kept so saved data survives the rename).
 
      `cleanState()` validates any loaded data.
-  6. Today view, Schedule view, Moves library, tabs, and the player (timer, beeps via WebAudio, speechSynthesis voice cues, screen wake lock).
+  6. Today view, Schedule view, Moves library, tabs, **Invite + install** and the player. Invite + install covers: the header "Invite friends" button, which uses `navigator.share` and falls back to copying the link; and `#installBar`, which shows an Install button on Android/Chrome via `beforeinstallprompt` and Add to Home Screen steps on iPhone. A dismissed banner stays hidden for 14 days.
+
+     The player covers the timer, beeps via WebAudio, speechSynthesis voice cues and the screen wake lock.
   7. One `requestAnimationFrame` loop that drives the hero, the library cards (every other frame, visible cards only) and the player.
 
 ## Conventions

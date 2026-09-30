@@ -1,6 +1,6 @@
 // 1 Bell service worker: makes the app open offline once it has been loaded once.
 // Bump VERSION whenever you deploy changes so phones pick up the new files.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE = '1bell-' + VERSION;
 const SHELL = [
   './', 'index.html', 'styles.css', 'app.js', 'config.js', 'manifest.webmanifest',

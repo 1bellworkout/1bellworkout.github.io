@@ -59,6 +59,7 @@
       <button role="tab" id="tab-sched" aria-selected="false" data-v="sched">Schedule</button>
       <button role="tab" id="tab-moves" aria-selected="false" data-v="moves">Moves</button>
     </nav>
+    <button class="btn-invite" id="inviteBtn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zM6 10V7H4v3H1v2h3v3h2v-3h3v-2zm10 3c-2.7 0-8 1.3-8 4v3h16v-3c0-2.7-5.3-4-8-4z"/></svg>Invite friends</button>
   </div>
 </header>
 
@@ -204,6 +205,14 @@
     </div>
   </div>
 </div>
+
+<aside class="install" id="installBar" hidden aria-label="Install 1 Bell">
+  <img src="icons/icon-192.png" alt="" width="40" height="40">
+  <div class="install-txt" id="installTxt"></div>
+  <button class="btn-sm install-go" id="installGo" type="button" hidden>Install</button>
+  <button class="install-x" id="installX" type="button" aria-label="Dismiss">×</button>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>

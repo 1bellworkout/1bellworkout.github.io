@@ -872,6 +872,55 @@ function show(v){ view = v;
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => show(b.dataset.v));
 if (['sched','moves'].includes(location.hash.slice(1))) show(location.hash.slice(1));
 
+/* ============ Invite + install ============ */
+// Invite uses the phone's own share sheet (Messages, WhatsApp, email...), so contacts and phone
+// numbers never pass through the app. Web apps can't install themselves, so people who open the
+// link get a banner: a real Install button on Android/Chrome, Add to Home Screen steps on iPhone.
+const APP_URL = location.origin + location.pathname.replace(/index\.html$/, '');
+let toastT = 0;
+function toast(t){ const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 3500); }
+async function invite(){
+  const text = 'Work out with me on 1 Bell: 20–30 minute kettlebell workouts with a 3D coach. Open this link, then add it to your home screen:';
+  if (navigator.share){
+    try { await navigator.share({title: '1 Bell', text, url: APP_URL}); return; }
+    catch(e){ if (e && e.name === 'AbortError') return; }
+  }
+  try { await navigator.clipboard.writeText(text + ' ' + APP_URL); toast('Invite copied. Paste it into a text or email.'); }
+  catch(e){ window.prompt('Copy this invite link:', APP_URL); }
+}
+$('inviteBtn').onclick = invite;
+
+const STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IN_APP = /FBAN|FBAV|Instagram|Line\/|Snapchat|TikTok/i.test(navigator.userAgent);
+const DISMISS_KEY = LSK + '-install-dismissed';
+let installEvt = null;
+function installDismissed(){ const t = +lsGet(DISMISS_KEY) || 0; return Date.now() - t < 14 * 864e5; }
+function showInstall(){
+  if (STANDALONE || installDismissed()) return;
+  const txt = $('installTxt'), go = $('installGo');
+  if (installEvt){
+    txt.innerHTML = '<b>Install 1 Bell</b><span>Opens from your home screen and works offline.</span>';
+    go.hidden = false;
+  } else if (IOS){
+    txt.innerHTML = IN_APP
+      ? '<b>Open in Safari to install</b><span>Tap ⋯ or the compass icon, choose “Open in Safari”, then add it to your home screen.</span>'
+      : '<b>Add 1 Bell to your home screen</b><span>Tap <svg class="ios-share" viewBox="0 0 24 24" aria-label="Share"><path d="M12 3l4 4-1.4 1.4L13 6.8V15h-2V6.8L9.4 8.4 8 7zM5 10h4v2H7v8h10v-8h-2v-2h4v12H5z"/></svg> Share, then “Add to Home Screen”.</span>';
+    go.hidden = true;
+  } else return;   // desktop browsers without an install prompt: no banner
+  $('installBar').hidden = false;
+}
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; showInstall(); });
+window.addEventListener('appinstalled', () => { $('installBar').hidden = true; installEvt = null; });
+$('installGo').onclick = async () => {
+  if (!installEvt) return;
+  installEvt.prompt();
+  try { await installEvt.userChoice; } catch(e){}
+  installEvt = null; $('installBar').hidden = true;
+};
+$('installX').onclick = () => { lsSet(DISMISS_KEY, String(Date.now())); $('installBar').hidden = true; };
+setTimeout(showInstall, 1500);
+
 function renderCoach(){
   const cc = $('coachChips'); cc.textContent = '';
   for (const id in STYLES){ const b = document.createElement('button'); b.setAttribute('aria-pressed', String(state.coach.style === id));
