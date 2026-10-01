@@ -1,0 +1,40 @@
+# Free Supabase projects pause after about a week without activity.
+# This runs a tiny database query every 3 days so the project stays awake.
+# If the project has already paused, the run fails and GitHub emails you:
+# resume it from the Supabase dashboard.
+#
+# GitHub also switches off scheduled workflows in public repos after 60 days
+# without commits, so once a month this adds an empty commit (no file changes).
+name: Keep Supabase awake
+on:
+  schedule:
+    - cron: '17 12 */3 * *'   # 12:17 UTC on every third day of the month
+    - cron: '41 6 1 * *'      # 06:41 UTC on the 1st: monthly empty commit
+  workflow_dispatch:           # adds a "Run workflow" button for a manual test
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query the plans table
+        env:
+          # Same public values as config.js; row-level security keeps all data private.
+          SUPABASE_URL: https://dbyffaqhdtqulfximmaq.supabase.co
+          SUPABASE_KEY: sb_publishable_XUDIwMFw_mXN34QuxJD_WA_7s-JJwC2
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$SUPABASE_URL/rest/v1/plans?select=user_id&limit=1" -H "apikey: $SUPABASE_KEY")
+          echo "Supabase answered HTTP $code"
+          test "$code" = "200"
+
+  stay-enabled:
+    if: github.event.schedule == '41 6 1 * *'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Empty commit so GitHub keeps this schedule on
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "Monthly keep-alive (no changes)"
+          git push
