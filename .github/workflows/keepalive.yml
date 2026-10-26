@@ -1,6 +1,8 @@
 # Free Supabase projects pause after about a week without activity.
-# This runs a tiny database query every 3 days so the project stays awake.
-# If the project has already paused, the run fails and GitHub emails you:
+# A read-only check every 3 days wasn't enough (the project paused on 2026-10-10),
+# so this now writes to the database once a day via ping_keepalive()
+# (see supabase/keepalive.sql).
+# If the project has paused anyway, the run fails and GitHub emails you:
 # resume it from the Supabase dashboard.
 #
 # GitHub also switches off scheduled workflows in public repos after 60 days
@@ -8,22 +10,24 @@
 name: Keep Supabase awake
 on:
   schedule:
-    - cron: '17 12 */3 * *'   # 12:17 UTC on every third day of the month
+    - cron: '17 12 * * *'     # 12:17 UTC every day
     - cron: '41 6 1 * *'      # 06:41 UTC on the 1st: monthly empty commit
   workflow_dispatch:           # adds a "Run workflow" button for a manual test
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Query the plans table
+      - name: Write a timestamp to the database
         env:
           # Same public values as config.js; row-level security keeps all data private.
           SUPABASE_URL: https://dbyffaqhdtqulfximmaq.supabase.co
           SUPABASE_KEY: sb_publishable_XUDIwMFw_mXN34QuxJD_WA_7s-JJwC2
         run: |
-          code=$(curl -s -o /dev/null -w '%{http_code}' "$SUPABASE_URL/rest/v1/plans?select=user_id&limit=1" -H "apikey: $SUPABASE_KEY")
-          echo "Supabase answered HTTP $code"
-          test "$code" = "200"
+          body=$(curl -sS -w '\nHTTP %{http_code}' -X POST "$SUPABASE_URL/rest/v1/rpc/ping_keepalive" \
+            -H "apikey: $SUPABASE_KEY" -H "Content-Type: application/json" -d '{}') \
+            || { echo "Could not reach Supabase. The project is probably paused: resume it from the dashboard."; exit 1; }
+          echo "$body"
+          echo "$body" | tail -n1 | grep -q 'HTTP 200'
 
   stay-enabled:
     if: github.event.schedule == '41 6 1 * *'
