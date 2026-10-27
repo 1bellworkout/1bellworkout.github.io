@@ -16,6 +16,7 @@ This app was first built as a claude.ai artifact and then moved here as a plain 
 - `styles.css`: all styling. Colors are CSS custom properties on `:root`. Dark mode redefines them under `prefers-color-scheme: dark` and under `[data-theme="dark"]`.
 - `config.js`: Supabase URL + anon key (`window.ONEBELL_CONFIG`). While it holds the `YOUR_...` placeholders, the app runs without accounts.
 - `supabase/schema.sql`: the `plans` table (one row per user, `data` jsonb) plus row-level security policies.
+- `supabase/keepalive.sql` + `.github/workflows/keepalive.yml`: the free plan pauses an inactive project. A GitHub Actions routine calls `ping_keepalive()` every day; it updates one timestamp row, and that write is what keeps the project awake (a read-only ping wasn't enough). On the 1st of each month the routine also makes an empty commit, so GitHub doesn't switch off the schedule.
 - `sw.js`: service worker that caches the app shell and CDN libraries. Bump `VERSION` on every deploy. `manifest.webmanifest` and `icons/` make the app installable.
 - `app.js`: all logic, in one IIFE. Its sections are marked with `/* ============ ... ============ */` banners, in this order:
   1. **Mannequin rig (2D)**: forward kinematics plus 2-bone IK in the body's side plane. Units are world units with y up and the floor at y=0. Leg and torso angles are measured from straight up; arm angles from straight down. The near (right) ankle is the root. The `Mannequin` class is an SVG side-view renderer, used only as a fallback when WebGL is unavailable.
@@ -37,7 +38,7 @@ This app was first built as a claude.ai artifact and then moved here as a plain 
      `cleanState()` validates any loaded data.
   6. Today view, Schedule view, Moves library, tabs, **Invite + install** and the player. Invite + install covers: the header "Invite friends" button, which uses `navigator.share` and falls back to copying the link; and `#installBar`, which shows an Install button on Android/Chrome via `beforeinstallprompt` and Add to Home Screen steps on iPhone. A dismissed banner stays hidden for 14 days.
 
-     The player covers the timer, beeps via WebAudio, speechSynthesis voice cues and the screen wake lock.
+     The player covers the timer, beeps via WebAudio, speechSynthesis voice cues and the screen wake lock. Its progress bar (`buildProgress()` / `renderProgress()`) groups segments into `PHASES`: warm-up, main set (work and rest) and cool-down. Each phase has its own icon and colour token (`--ph-warm/main/cool`). Segment widths follow their seconds, and the header shows the time done and left.
   7. One `requestAnimationFrame` loop that drives the hero, the library cards (every other frame, visible cards only) and the player.
 
 ## Conventions

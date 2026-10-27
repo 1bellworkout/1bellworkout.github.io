@@ -167,7 +167,10 @@
       <div class="eyebrow" id="pTitle"><b>Workout</b></div>
       <button class="p-x" id="pEnd">End workout</button>
     </div>
-    <div class="bar" id="pBar"></div>
+    <div class="prog">
+      <div class="prog-h"><span class="prog-ph" id="pPhaseName"></span><span class="prog-t num" id="pLeft"></span></div>
+      <div class="prog-bar" id="pBar" role="progressbar" aria-label="Workout progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+    </div>
     <div class="p-main" id="pMain">
       <div class="p-stage" id="pStage"><span class="p-phase" id="pPhase">Work</span><span class="p-side" id="pSide" hidden>Switch sides</span></div>
       <div class="p-info">

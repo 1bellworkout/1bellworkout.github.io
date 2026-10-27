@@ -10,6 +10,7 @@ img{max-width:100%}
   --signal:#E7AE0C; --signal-ink:#1B2024; --link:#245A92; --done:#2F7D57;
   --wood:#C89865; --wood-far:#A67A4E; --joint:#7E5733; --iron:#2A2F35; --iron-hi:#5B636C;
   --stage:#DFE2DB; --floor:#B9BEB5;
+  --ph-warm:#D9661F; --ph-main:#E7AE0C; --ph-cool:#2F7FC1;
   --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
   --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
@@ -18,12 +19,12 @@ img{max-width:100%}
   --bg:#14171A; --surface:#1C2024; --ink:#ECEDE7; --muted:#9BA3AA; --line:#2E343A;
   --signal:#F0BD22; --signal-ink:#14171A; --link:#86B1E6; --done:#5CC08E;
   --wood:#D2A474; --wood-far:#946C45; --joint:#6E4B2B; --iron:#3B4249; --iron-hi:#7A838C;
-  --stage:#20252A; --floor:#3A4148; color-scheme:dark}}
+  --stage:#20252A; --floor:#3A4148; --ph-warm:#F08A4B; --ph-main:#F0BD22; --ph-cool:#6FA8E8; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#14171A; --surface:#1C2024; --ink:#ECEDE7; --muted:#9BA3AA; --line:#2E343A;
   --signal:#F0BD22; --signal-ink:#14171A; --link:#86B1E6; --done:#5CC08E;
   --wood:#D2A474; --wood-far:#946C45; --joint:#6E4B2B; --iron:#3B4249; --iron-hi:#7A838C;
-  --stage:#20252A; --floor:#3A4148; color-scheme:dark}
+  --stage:#20252A; --floor:#3A4148; --ph-warm:#F08A4B; --ph-main:#F0BD22; --ph-cool:#6FA8E8; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
 h1,h2,h3{font-family:var(--f-display);font-weight:800;letter-spacing:.01em;line-height:1;text-wrap:balance;margin:0;text-transform:uppercase}
@@ -131,11 +132,24 @@ main{padding-block:24px 64px}
 .p-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .p-top .eyebrow b{color:var(--ink)}
 .p-x{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font-weight:600;font-size:14px}
-.bar{display:flex;gap:2px;height:8px}
-.bar i{flex:1;background:var(--line);border-radius:2px;position:relative;overflow:hidden}
-.bar i.w{flex:2}
-.bar i.past{background:var(--ink)}
-.bar i.cur::after{content:"";position:absolute;inset:0;width:var(--p,0%);background:var(--signal)}
+/* workout progress: phase groups (warm-up / main set / cool-down) */
+.ph-warm{--ph:var(--ph-warm)} .ph-main{--ph:var(--ph-main)} .ph-cool{--ph:var(--ph-cool)}
+.prog{display:grid;gap:8px}
+.prog-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.prog-ph{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.prog-ph svg{width:16px;height:16px;color:var(--ph)}
+.prog-t{font-size:13px;font-weight:600;color:var(--muted)}
+.prog-bar{display:flex;gap:8px;align-items:end}
+.ph{display:grid;gap:5px;min-width:0;flex-basis:0;container-type:inline-size}
+.ph-l{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;color:var(--muted)}
+.ph-l svg{width:14px;height:14px;flex:none;color:var(--ph)}
+.ph.on .ph-l{color:var(--ink)}
+@container (max-width:84px){.ph-l span{display:none}}
+.ph-segs{display:flex;gap:2px;align-items:center;height:12px}
+.ph-segs i{flex-basis:0;min-width:2px;height:12px;border-radius:3px;position:relative;overflow:hidden;background:color-mix(in srgb,var(--ph) 22%,var(--line))}
+.ph-segs i.rest{height:6px}
+.ph-segs i.past{background:var(--ph)}
+.ph-segs i.cur::after{content:"";position:absolute;inset:0;width:var(--p,0%);background:var(--ph)}
 .p-main{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;align-items:center}
 @media (max-width:820px){.p-main{grid-template-columns:1fr}}
 .p-stage{background:var(--stage);border-radius:16px;position:relative;overflow:hidden}

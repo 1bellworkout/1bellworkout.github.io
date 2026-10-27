@@ -957,9 +957,45 @@ function startWorkout(){
   document.body.style.overflow = 'hidden';
   $('pTitle').innerHTML = ''; const b = document.createElement('b'); b.textContent = `Workout ${w.id} · ${w.name}`; $('pTitle').appendChild(b);
   $('pTitle').append(` · ${dur} min`);
-  const bar = $('pBar'); bar.textContent = '';
-  segs.forEach(s => { const i = document.createElement('i'); if (s.kind !== 'rest') i.className = 'w'; bar.appendChild(i); });
+  buildProgress(segs);
   enterSeg(0);
+}
+/* Progress bar: one group per phase (warm-up / main set / cool-down), each with an icon and
+   label, segments sized by their real duration, rests drawn thinner than work. */
+const PHASES = {
+  warm: {name:'Warm-up',   icon:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2c1 3.5-1.5 5-1.5 7.5A2.5 2.5 0 0 0 13 12c1.4 0 2.3-1 2.5-2.3C17.3 11.3 18 13.4 18 15a6 6 0 0 1-12 0c0-4.6 4.4-6.6 6-13z"/></svg>'},
+  main: {name:'Main set',  icon:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 2h8a3 3 0 0 1 3 3v2a3 3 0 0 1-1 2.2A7.5 7.5 0 1 1 6 9.2 3 3 0 0 1 5 7V5a3 3 0 0 1 3-3zm0 2a1 1 0 0 0-1 1v2c0 .2 0 .4.2.5A7.5 7.5 0 0 1 12 6.5c1.8 0 3.5.6 4.8 1.6l.2-.1V5a1 1 0 0 0-1-1z"/></svg>'},
+  cool: {name:'Cool-down', icon:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>'}
+};
+const phaseOf = s => s.kind === 'warm' ? 'warm' : s.kind === 'cool' ? 'cool' : 'main';
+const mmss = t => `${Math.floor(t/60)}:${pad(Math.floor(t%60))}`;
+function buildProgress(segs){
+  const bar = $('pBar'); bar.textContent = '';
+  P.bars = []; P.groups = {}; P.starts = []; P.total = 0; P.leftShown = -1;
+  let grp = null, key = null;
+  segs.forEach(s => {
+    P.starts.push(P.total); P.total += s.sec;
+    const k = phaseOf(s);
+    if (k !== key){
+      key = k;
+      grp = document.createElement('div'); grp.className = 'ph ph-' + k; grp._sec = 0;
+      grp.innerHTML = `<div class="ph-l">${PHASES[k].icon}<span>${PHASES[k].name}</span></div><div class="ph-segs"></div>`;
+      bar.appendChild(grp); P.groups[k] = grp;
+    }
+    grp._sec += s.sec; grp.style.flexGrow = grp._sec;
+    const i = document.createElement('i'); i.style.flexGrow = s.sec; if (s.kind === 'rest') i.className = 'rest';
+    grp.querySelector('.ph-segs').appendChild(i); P.bars.push(i);
+  });
+}
+function renderProgress(){
+  const s = P.segs[P.i], k = phaseOf(s);
+  const done = P.starts[P.i] + Math.min(P.el, s.sec), left = Math.max(0, Math.ceil(P.total - done));
+  const cur = P.bars[P.i]; if (cur) cur.style.setProperty('--p', Math.min(100, P.el/s.sec*100).toFixed(1)+'%');
+  if (left === P.leftShown) return;
+  P.leftShown = left;
+  $('pLeft').textContent = `${mmss(Math.floor(done))} done · ${mmss(left)} left`;
+  $('pBar').setAttribute('aria-valuenow', String(Math.round(done / P.total * 100)));
+  $('pBar').setAttribute('aria-valuetext', `${PHASES[k].name}, ${mmss(left)} left`);
 }
 function enterSeg(i){
   P.i = i; P.el = 0; P.beeped = {};
@@ -977,7 +1013,12 @@ function enterSeg(i){
   else if (nx){ $('pNext').append('Next: '); const b = document.createElement('b'); b.textContent = EX[nx.ex].name; $('pNext').appendChild(b); }
   else $('pNext').append('Last one!');
   $('pSide').hidden = true;
-  [...$('pBar').children].forEach((b,j) => { b.classList.toggle('past', j < i); b.classList.toggle('cur', j === i); b.style.removeProperty('--p'); });
+  P.bars.forEach((b,j) => { b.classList.toggle('past', j < i); b.classList.toggle('cur', j === i); b.style.removeProperty('--p'); });
+  const k = phaseOf(s);
+  for (const g in P.groups) P.groups[g].classList.toggle('on', g === k);
+  $('pPhaseName').className = 'prog-ph ph-' + k;
+  $('pPhaseName').innerHTML = PHASES[k].icon; $('pPhaseName').append(PHASES[k].name);
+  P.leftShown = -1; renderProgress();
   if (isRest) say(`Rest. Next, ${ex.name}.`); else say(ex.name + (ex.sided ? '. Switch sides halfway.' : ''));
   if (!isRest) beep(1320, 220, .22);
 }
@@ -990,7 +1031,7 @@ function tickPlayer(now){
   const secs = Math.ceil(rem);
   $('pTime').textContent = secs;
   $('pRing').setAttribute('stroke-dashoffset', (CIRC * (P.el / s.sec)).toFixed(1));
-  const cur = $('pBar').children[P.i]; if (cur) cur.style.setProperty('--p', Math.min(100, P.el/s.sec*100).toFixed(1)+'%');
+  renderProgress();
   if (!P.paused){
     for (const n of [3,2,1]) if (rem <= n && rem > n-1 && !P.beeped[n]){ P.beeped[n] = 1; beep(660, 110); }
     const ex = EX[s.ex];
