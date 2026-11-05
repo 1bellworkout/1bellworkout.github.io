@@ -297,6 +297,101 @@ const EX = {
       {na:{u:0,l:0}, bell:'along'},
       {na:{u:188,l:196}, bell:'along'}],
     cues:['Hold the horns, bell at your waist','Arms long: lift it up and over your head','Ribs down, then lower with control']},
+  // Moves from Garrett Merrill's "one kettlebell, 20 minutes" series.
+  halothruster:{name:'Halo Thruster', tag:'Full body', tempo:5.6, keys:[
+      {na:{t:[16,163]}, bell:'along', zc:[20,4,-20,-4,'two',0]},
+      {na:{t:[3,171]}, bell:'along', zc:[22,22,-4,15,'two',19]},
+      {na:{t:[-13,160], k:1}, bell:'along', zc:[20,4,-20,-4,'two',0]},
+      {na:{t:[3,171]}, bell:'along', zc:[4,-15,-22,-22,'two',-19]},
+      {s:36,t:-78,b:28, na:{u:30,l:170}, bell:'along', zc:[13,5,-13,-5,'two',0]},
+      {na:{u:176,l:178}, bell:'along', zc:[13,5,-13,-5,'two',0]}],
+    cues:['One halo around your head','Squat deep with the bell at your chest','Drive up and press it overhead']},
+  squatthruster:{name:'Squat to Thruster', tag:'Legs · full body', tempo:5, keys:[
+      {na:{u:12,l:160}, bell:'rack'},
+      {s:38,t:-80,b:30, na:{u:30,l:170}, bell:'rack'},
+      {na:{u:12,l:160}, bell:'rack'},
+      {s:38,t:-80,b:30, na:{u:30,l:170}, bell:'rack'},
+      {na:{u:176,l:178}, bell:'rack'}],
+    cues:['Squat once, stand','Squat again, then drive straight into a press','Elbows snap under the bell before you squat']},
+  shoulderpullover:{name:'Over-the-Shoulder Pullover', tag:'Lats · shoulders', tempo:5, keys:[
+      {na:{u:0,l:0}, bell:'along', zc:[12,4,-12,-4,'two',0]},
+      {na:{t:[-8,158], k:1}, bell:'along', zc:[22,20,-4,14,'two',18]},
+      {na:{u:0,l:0}, bell:'along', zc:[12,4,-12,-4,'two',0]},
+      {na:{t:[-8,158], k:1}, bell:'along', zc:[4,-14,-22,-20,'two',-18]},
+      {na:{u:0,l:0}, bell:'along', zc:[12,4,-12,-4,'two',0]},
+      {na:{u:188,l:196}, bell:'along', zc:[12,4,-12,-4,'two',0]}],
+    cues:['Bell at your waist, hold the horns','Over one shoulder, over the other, then over your head','That’s one rep: stay slow and controlled']},
+  curlhalo:{name:'Curl to Halo', tag:'Biceps · shoulders', tempo:4.6, keys:[
+      {na:{u:0,l:0}, bell:'along', zc:[14,5,-14,-5,'two',0]},
+      {na:{u:8,l:150}, bell:'along', zc:[14,5,-14,-5,'two',0]},
+      {na:{t:[16,163]}, bell:'along', zc:[20,4,-20,-4,'two',0]},
+      {na:{t:[3,171]}, bell:'along', zc:[22,22,-4,15,'two',19]},
+      {na:{t:[-13,160], k:1}, bell:'along', zc:[20,4,-20,-4,'two',0]},
+      {na:{t:[3,171]}, bell:'along', zc:[4,-15,-22,-22,'two',-19]}],
+    cues:['Curl the bell up by the horns','Circle it once around your head','Lower and curl again; switch direction each rep']},
+  hornlift:{name:'Horn Lift', tag:'Shoulders · upper chest', tempo:2.8, keys:[
+      {na:{u:0,l:0}, bell:'hang'},
+      {na:{u:112,l:112}, bell:'hang'}],
+    cues:['Squeeze the horns together hard','Lift the bell up to forehead height','Lower slowly, don’t lean back']},
+  ballisticrow:{name:'Ballistic Row', tag:'Back · power', tempo:1.4, keys:[
+      {s:15,t:-45,b:72, na:{u:-4,l:-4}, fa:{u:-4,l:-4}, bell:'hang'},
+      {s:15,t:-45,b:72, na:{u:-72,l:-6}, fa:{u:-10,l:-10}, bell:'hang'}],
+    cues:['Hinge over, bell hanging below you','Row it up explosively','Catch it and lower slowly, alternating hands']},
+  renegade:{name:'Renegade Row', tag:'Back · core', tempo:2.6, sided:true, keys:[
+      {rx:-72,ay:6,fv:[4,-6],s:68,t:68,b:68, na:{t:[64,12]}, fa:{t:[64,2]}, bell:'hang'},
+      {rx:-72,ay:6,fv:[4,-6],s:68,t:68,b:68, na:{t:[34,42], k:1}, fa:{t:[64,2]}, bell:'hang'}],
+    cues:['High plank, one hand on the bell','Row it to your hip without twisting','Feet wide for balance; switch sides halfway']},
+  liftoffpush:{name:'Lift-Off Push-Up', tag:'Chest · core', tempo:3.2, keys:[
+      {rx:-72,ay:6,fv:[4,-6],s:68,t:68,b:68, na:{t:[64,2]}},
+      {rx:-72,ay:6,fv:[4,-6],s:82,t:82,b:82, na:{t:[64,2]}},
+      {rx:-72,ay:6,fv:[4,-6],s:68,t:68,b:68, na:{t:[64,2]}},
+      {rx:-72,ay:6,fv:[4,-6],s:68,t:68,b:68, na:{t:[58,48], k:1}, fa:{t:[64,2]}}],
+    cues:['Do a push-up','At the top, lift one hand and tap your shoulder','Alternate hands; hips stay still']},
+  situppress:{name:'Sit-Up to Press', tag:'Core · shoulders', tempo:4, keys:[
+      {...lie, na:{u:98,l:220}, bell:'along'},
+      {...lie, b:-5, na:{u:20,l:170}, bell:'along'},
+      {...lie, b:-5, na:{u:176,l:178}, bell:'along'},
+      {...lie, b:-5, na:{u:20,l:170}, bell:'along'}],
+    cues:['Lie back, bell close to your chest','Sit all the way up','Press it overhead, then lower with control']},
+  deadbug:{name:'Dead Bug', tag:'Core', tempo:2.6, keys:[
+      {rx:44, ay:54, s:-90, t:180, b:-90, fv:[0,12], ff:[44,54], ffv:[0,12], na:{u:180,l:180}},
+      {rx:44, ay:54, s:-90, t:180, b:-90, fv:[0,12], ff:[88,16], ffv:[6,10], na:{u:262,l:262}, fa:{u:180,l:180}}],
+    cues:['Lie on your back, knees and arms up','Kick one leg out as the opposite arm reaches back','Low back stays pressed to the floor']},
+  legraise:{name:'Bell-Hold Leg Raise', tag:'Core', tempo:3.6, keys:[
+      {rx:88, ay:6, s:-90, t:-90, b:-90, fv:[2,12], na:{u:180,l:180}, bell:'along'},
+      {rx:62, ay:68, s:-135, t:-135, b:-90, fv:[9,9], na:{u:180,l:180}, bell:'along'},
+      {rx:2, ay:96, s:-178, t:-178, b:-90, fv:[12,2], na:{u:180,l:180}, bell:'along'},
+      {rx:62, ay:68, s:-135, t:-135, b:-90, fv:[9,9], na:{u:180,l:180}, bell:'along'}],
+    cues:['Lie down, bell held straight up over your chest','Raise straight legs up to touch the bell','Lower slowly without arching your back']},
+  crabdip:{name:'Floor Triceps Dip', tag:'Triceps · bodyweight', tempo:2.6, keys:[
+      {rx:60, s:-27, t:-126, b:-35, fv:[12,0], na:{t:[-34,2], k:1}},
+      {rx:60, s:-27, t:-126, b:-50, fv:[12,0], na:{t:[-34,2], k:1}}],
+    cues:['Sit, hands on the floor behind you','Lift your hips, then bend your elbows','Press back up until the elbows lock']},
+  calfraise:{name:'Single-Leg Calf Raise', tag:'Calves', tempo:2.2, sided:true, keys:[
+      {ff:[-14,40], ffv:[-2,-12], na:{u:10,l:10}},
+      {ay:7, fv:[12,-7], ff:[-14,47], ffv:[-2,-12], na:{u:10,l:10}}],
+    cues:['Stand on one foot','Rise up onto the ball of your foot','Lower slowly; switch legs halfway']},
+  aroundworld:{name:'Around the World', tag:'Core · grip', tempo:2.4, keys:[
+      {na:{t:[20,95]}, bell:'hang', zc:[16,4,-16,-4,'two',0]},
+      {na:{t:[2,96]}, bell:'hang', zc:[22,24,-12,18,'two',23]},
+      {na:{t:[-18,96]}, bell:'hang', zc:[16,4,-16,-4,'two',0]},
+      {na:{t:[2,96]}, bell:'hang', zc:[12,-18,-22,-24,'two',-23]}],
+    cues:['Pass the bell around your waist, hand to hand','Hips stay square, core tight','Switch direction halfway']},
+  throwover:{name:'Throwover', tag:'Full body · power', tempo:2.6, sided:true, keys:[
+      {s:12,t:-30,b:35, na:{t:[30,52]}, bell:'along', zc:[10,-12,-20,-14,'two',-13]},
+      {na:{t:[-6,160], k:1}, bell:'along', zc:[22,20,-4,14,'two',18]}],
+    cues:['Start with the bell low by one hip','Throw it up over the opposite shoulder, like a shovel of dirt','Slow and controlled; switch sides halfway']},
+  highpull1:{name:'One-Arm High Pull', tag:'Upper back · power', tempo:2, sided:true, keys:[
+      {s:20,t:-45,b:40, na:{u:0,l:0}, fa:{u:10,l:10}, bell:'hang'},
+      {s:0,t:0,b:-3, na:{u:100,l:-45}, fa:{u:-10,l:-10}, bell:'hang'}],
+    cues:['Hinge, bell in one hand','Stand up hard and pull the elbow high','Hand to about nose height; switch halfway']},
+  swingsquat:{name:'Swing to Squat', tag:'Hinge · legs', tempo:3.8, keys:[
+      {s:14,t:-58,b:62, na:{u:-25,l:-30}, bell:'along'},
+      {s:0,t:0,b:-4, na:{u:92,l:92}, bell:'along'},
+      {s:14,t:-58,b:62, na:{u:-25,l:-30}, bell:'along'},
+      {s:0,t:0,b:-4, na:{u:40,l:150}, bell:'along'},
+      {s:38,t:-80,b:30, na:{u:40,l:160}, bell:'along'}],
+    cues:['One swing','On the next swing, catch the bell at your chest','Drop into a squat, then swing again']},
   // bodyweight main moves (Bodyweight day)
   kneepush:{name:'Knee Push-Up', tag:'Chest · bodyweight', tempo:2.4, keys:[
       {rx:-70, ay:4, fv:[-8,6], s:90, t:64, b:64, na:{t:[67,2]}},
@@ -414,7 +509,11 @@ const ZC = {
   quadstretch:[18,18,-15,-12], kneehug:[16,10,-16,-10], hamstretch:[16,12,-16,-12], childpose:[20,18,-20,-18],
   cobra:[22,20,-22,-20], chest:[16,4,-16,-4], tristretch:[10,-2,-14,8], upperback:[16,3,-16,-3],
   halo:[20,4,-20,-4,'two'], standpullover:[12,4,-12,-4,'two'], kneepush:[23,20,-23,-20], superman:[16,14,-16,-14],
-  birddog:[20,18,-20,-18], bwsplit:[17,-5,-17,5], bwsldl:[17,12,-17,-12], crunch:[13,5,-13,-5]
+  birddog:[20,18,-20,-18], bwsplit:[17,-5,-17,5], bwsldl:[17,12,-17,-12], crunch:[13,5,-13,-5],
+  halothruster:[20,4,-20,-4,'two'], squatthruster:[13,5,-13,-5,'two'], shoulderpullover:[12,4,-12,-4,'two'], curlhalo:[14,5,-14,-5,'two'],
+  hornlift:[11,3,-11,-3,'two'], ballisticrow:[16,10,-16,-14,'one'], renegade:[23,22,-23,-20,'one'], liftoffpush:[23,20,-23,-20],
+  situppress:[13,5,-13,-5,'two'], deadbug:[16,14,-16,-14], legraise:[12,4,-12,-4,'two'], crabdip:[18,20,-18,-20],
+  calfraise:[17,15,-17,-15], aroundworld:[16,4,-16,-4,'two'], throwover:[16,4,-16,-4,'two'], highpull1:[22,6,-16,-16,'one'], swingsquat:[12,4.5,-12,-4.5,'two']
 };
 const SKINS = ['#F1CBA8','#D9A47C','#B07A55','#8A5A3B','#5E3C28'];
 const STYLES = {
@@ -702,14 +801,52 @@ const WORKOUTS = [
         format:{20:{work:30, rest:30}, 30:{work:35, rest:25}}},
       {name:'Lower Body', moves:['bwsquat','bwsplit','slbridge','bwsldl','superman','crunch']},
       {name:'Upper & Core', moves:['pushup','superman','pike','birddog','climber','plank']},
-      {name:'Full Body', moves:['bwsquat','pushup','bwlunge','superman','climber','plank']}]}
+      {name:'Full Body', moves:['bwsquat','pushup','bwlunge','superman','climber','plank']}]},
+  // From Garrett Merrill's "one kettlebell, 20 minutes" YouTube series (rep targets as he
+  // gives them; `amrap` holds them for AMRAP mode). Moves the rig can't show (Cossack squats,
+  // Russian twists, twisted lunges, uppercuts, shrugs) are swapped for the closest match.
+  {id:'G', name:'Garrett Merrill', extra:true, focus:'Routines from Garrett Merrill’s “one kettlebell, 20 minutes a day” series.',
+    warm:['march','bwsquat','hinge','armswing','pike'],
+    cool:['chest','childpose','fold','quadstretch'],
+    routines:[
+      {name:'Arms', note:'His Days 13, 20 and 27.', moves:['standpullover','curlhalo','crabdip','throwover','curl','shoulderpullover'],
+        amrap:{standpullover:'10', curlhalo:'10, switch direction each rep', crabdip:'10', throwover:'5 each side', curl:'10 slow', shoulderpullover:'10 each side'}},
+      {name:'Back', note:'His Day 14 (shrugs swapped for one-arm high pulls).', moves:['row','deadlift','ballisticrow','kbgm','renegade','highpull1'],
+        amrap:{row:'10 each side', deadlift:'10', ballisticrow:'10 each hand', kbgm:'10', renegade:'10 each side', highpull1:'10 each side'}},
+      {name:'Cardio', note:'His Day 17.', moves:['highpull1','situppress','deadbug','swing','standpullover','halo'],
+        amrap:{highpull1:'15 each side', situppress:'12', deadbug:'15 kicks each leg', swing:'20', standpullover:'10', halo:'5 each way'}},
+      {name:'Chest', note:'His Day 23 (devil’s halos shown as halos).', moves:['hornlift','liftoffpush','gfloorpress','floorpress','halo','cleanpress'],
+        amrap:{hornlift:'10', liftoffpush:'10', gfloorpress:'10 in the middle', floorpress:'10 each side', halo:'5 each way', cleanpress:'10 each side'}},
+      {name:'Total Body', note:'His Day 24.', moves:['row','clean','goblet','press','highpull','standpullover'],
+        amrap:{row:'10 each side', clean:'10 each side', goblet:'10', press:'10 each side', highpull:'10', standpullover:'10'}},
+      {name:'Legs', note:'His Days 18 and 25 (twisted lunges shown as reverse lunges).', moves:['squatthruster','sldl','halo','lunge','calfraise','goblet'],
+        amrap:{squatthruster:'10', sldl:'10 each leg', halo:'5 each way', lunge:'6 each leg', calfraise:'10 each leg', goblet:'10'}},
+      {name:'Halo Thrusters', note:'His Days 8 and 21.', moves:['halothruster','thruster','shoulderpullover','halo','swing','standpullover'],
+        amrap:{halothruster:'10', thruster:'10', shoulderpullover:'8', halo:'5 each way', swing:'15', standpullover:'10'}},
+      {name:'Clean & Press', note:'His Days 4 and 10.', moves:['cleanpress','swing','renegade','lunge','liftoffpush','situppress'],
+        amrap:{cleanpress:'8 each side', swing:'15', renegade:'10 each side', lunge:'8 each leg', liftoffpush:'8 each side', situppress:'8'}},
+      {name:'40-Second Burner', note:'His Day 35: 40 seconds per move.', moves:['swingsquat','ballisticrow','gfloorpress','legraise','curl','aroundworld'],
+        amrap:{swingsquat:'10', ballisticrow:'10 each hand', gfloorpress:'10', legraise:'10', curl:'10 slow', aroundworld:'5 each way'}},
+      {name:'Halo Complex', note:'10 halos one way, 10 the other, then 10 pullovers.',
+        moves:['halo','standpullover'], reps:{halo:'10 each way', standpullover:'10 reps'},
+        format:{20:{n:2, rounds:10, work:[40,30], rest:5, roundRest:20}, 30:{n:2, rounds:15, work:[40,30], rest:5, roundRest:20}}}]}
 ];
 const ROTATION = WORKOUTS.filter(w => !w.extra);
 // warmN/coolN: how many warm-up moves / stretches; sw: seconds to change position between them.
 const FORMAT = {
   20:{warmN:4, warmSec:30, n:5, rounds:3, work:40, rest:20, roundRest:30, coolN:3, sw:5},
-  30:{warmN:5, warmSec:35, n:6, rounds:4, work:45, rest:15, roundRest:20, coolN:4, sw:5}
+  30:{warmN:5, warmSec:35, n:6, rounds:4, work:45, rest:15, roundRest:20, coolN:4, sw:5},
+  // AMRAP: timed warm-up, then as many rounds as possible of the routine in amrapSec, then cool-down.
+  amrap:{warmN:4, warmSec:30, coolN:3, sw:5, amrapSec:1200}
 };
+const isAmrap = d => d === 'amrap';
+// Rep target per move in AMRAP mode: the routine's own, else a sensible default.
+const AMR_DEFAULT = {plank:'30-second hold', climber:'20', swing:'15', bwsquat:'20', march:'20'};
+function repTarget(R, m){
+  const ex = EX[m];
+  return (R.amrap && R.amrap[m]) || (R.reps && R.reps[m]) || AMR_DEFAULT[m]
+    || (ex.sided ? (ex.switchCue ? '10 each way' : '10 each side') : '10');
+}
 const stretchSec = id => EX[id].sided ? 40 : 30;
 // Which routine of a day comes next: the one after the last you did, else by count.
 function routineIndex(w){
@@ -730,7 +867,9 @@ function buildSession(w, dur, ri){
     segs.push({kind:'warm', ph:'warm', ex:m, sec:F.warmSec, label:`Warm-up ${i+1} of ${warm.length}`});
   });
   segs.push({kind:'rest', ph:'main', ex:moves[0], sec:10, label: w.bw ? 'Warm-up done · Get ready' : 'Warm-up done · Grab your kettlebell'});
-  for (let r=1; r<=F.rounds; r++){
+  // AMRAP: one long block the player steps through move by move (tap Done) until time runs out.
+  if (isAmrap(dur)) segs.push({kind:'amrap', ph:'main', ex:moves[0], sec:F.amrapSec, moves, reps: moves.map(m => repTarget(R, m)), label:'AMRAP'});
+  else for (let r=1; r<=F.rounds; r++){
     moves.forEach((m,i)=>{
       const reps = R.reps && R.reps[m] ? ` · ${R.reps[m]}` : ` · Move ${i+1} of ${moves.length}`;
       segs.push({kind:'work', ph:'main', ex:m, sec:workSec(i), label:`${word} ${r} of ${F.rounds}${reps}`});
@@ -764,7 +903,7 @@ function cleanState(d){
   return {
     days: Array.isArray(d.days) ? d.days.filter(x => Number.isInteger(x) && x >= 0 && x < 7) : DEFAULT.days.slice(),
     dur: d.dur === 30 ? 30 : 20,
-    log: Array.isArray(d.log) ? d.log.filter(x => x && /^\d{4}-\d\d-\d\d$/.test(x.d) && WORKOUTS.some(w => w.id === x.w)).map(x => Object.assign({d:x.d, w:x.w, m:+x.m || 0}, Number.isInteger(x.v) && x.v >= 0 && x.v < 10 ? {v:x.v} : {})) : [],
+    log: Array.isArray(d.log) ? d.log.filter(x => x && /^\d{4}-\d\d-\d\d$/.test(x.d) && WORKOUTS.some(w => w.id === x.w)).map(x => Object.assign({d:x.d, w:x.w, m:+x.m || 0}, Number.isInteger(x.v) && x.v >= 0 && x.v < 20 ? {v:x.v} : {}, Number.isInteger(x.r) && x.r >= 0 && x.r < 500 ? {r:x.r} : {})) : [],
     coach: cleanCoach(d.coach)
   };
 }
@@ -1008,11 +1147,14 @@ function renderToday(){
   $('sessTitle').textContent = w.name;
   $('sessFocus').textContent = w.focus;
   const F = fmt(R, dur);
-  $('sessSpec').textContent = R.reps
+  const am = isAmrap(dur);
+  $('sessSpec').textContent = am
+    ? `${R.moves.length} moves · as many rounds as you can in ${F.amrapSec/60} min`
+    : R.reps
     ? `${F.rounds} sets · ${R.moves.map(m => `${R.reps[m]} ${EX[m].name.toLowerCase()}`).join(' + ')}`
     : `${F.n} moves × ${F.rounds} rounds · ${F.work}s on / ${F.rest}s off`;
   $('routineNote').textContent = R.note || ''; $('routineNote').hidden = !R.note;
-  ['d20','d30'].forEach(id => $(id).setAttribute('aria-pressed', String(+$(id).dataset.d === dur)));
+  ['d20','d30','dA'].forEach(id => $(id).setAttribute('aria-pressed', String($(id).dataset.d === String(dur))));
   const pr = $('pickR'); pr.textContent = '';
   const upR = routineIndex(w);
   w.routines.forEach((r, j) => {
@@ -1030,7 +1172,7 @@ function renderToday(){
   R.moves.slice(0, F.n).forEach((m,i) => {
     const li = document.createElement('li'); const b = document.createElement('button'); b.dataset.ex = m;
     b.innerHTML = `<span class="ix">${i+1}</span><span class="nm"></span><span class="tg"></span>`;
-    b.querySelector('.nm').textContent = EX[m].name; b.querySelector('.tg').textContent = EX[m].tag;
+    b.querySelector('.nm').textContent = EX[m].name; b.querySelector('.tg').textContent = am ? repTarget(R, m) : EX[m].tag;
     b.addEventListener('click', () => setPreview(m));
     li.appendChild(b); ol.appendChild(li);
   });
@@ -1063,6 +1205,7 @@ function renderToday(){
 }
 $('d20').onclick = () => { dur = 20; renderToday(); };
 $('d30').onclick = () => { dur = 30; renderToday(); };
+$('dA').onclick = () => { dur = 'amrap'; renderToday(); };
 
 /* ============ Schedule view ============ */
 let calMonth = (() => { const t = today(); return new Date(t.getFullYear(), t.getMonth(), 1); })();
@@ -1103,7 +1246,7 @@ function renderSched(){
   if (!sorted.length){ const li = document.createElement('li'); li.innerHTML = '<span>No sessions yet. Finish a workout and it lands here automatically.</span>'; h.appendChild(li); }
   sorted.forEach(l => { const w = WORKOUTS.find(x=>x.id===l.w) || {name:'Workout'}; const [y,m,d] = l.d.split('-').map(Number); const dt = new Date(y,m-1,d);
     const li = document.createElement('li'); li.innerHTML = '<b></b><span></span>';
-    li.querySelector('b').textContent = `${l.w} · ${w.name}` + (w.routines && w.routines[l.v] ? ` · ${w.routines[l.v].name}` : ''); li.querySelector('span').textContent = `${DOW[dt.getDay()]} ${MON[m-1].slice(0,3)} ${d} · ${l.m} min`; h.appendChild(li); });
+    li.querySelector('b').textContent = `${l.w} · ${w.name}` + (w.routines && w.routines[l.v] ? ` · ${w.routines[l.v].name}` : ''); li.querySelector('span').textContent = `${DOW[dt.getDay()]} ${MON[m-1].slice(0,3)} ${d} · ${l.m} min` + (Number.isInteger(l.r) ? ` · ${l.r} rounds` : ''); h.appendChild(li); });
   renderAcct();
 }
 $('calPrev').onclick = () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()-1, 1); renderSched(); };
@@ -1228,7 +1371,7 @@ function startWorkout(){
   $('player').hidden = false; $('pIn').hidden = false; $('pDone').hidden = true;
   document.body.style.overflow = 'hidden';
   $('pTitle').innerHTML = ''; const b = document.createElement('b'); b.textContent = `Workout ${w.id} · ${w.name}`; $('pTitle').appendChild(b);
-  $('pTitle').append(` · ${dur} min`);
+  $('pTitle').append(isAmrap(dur) ? ' · AMRAP' : ` · ${dur} min`);
   buildProgress(segs);
   enterSeg(0);
 }
@@ -1269,9 +1412,35 @@ function renderProgress(){
   $('pBar').setAttribute('aria-valuenow', String(Math.round(done / P.total * 100)));
   $('pBar').setAttribute('aria-valuetext', `${PHASES[k].name}, ${mmss(left)} left`);
 }
+/* AMRAP block: the clock runs for the whole block; you step through the routine's moves at
+   your own pace with Done (Back goes one move back). Rounds are counted and logged. */
+function amrapShow(){
+  const s = P.segs[P.i], A = P.am, m = s.moves[A.k], ex = EX[m];
+  pm.set(ex, 1);
+  $('pPhase').textContent = 'AMRAP · your pace'; $('pPhase').className = 'p-phase';
+  $('pName').textContent = ex.name;
+  $('pRound').textContent = `Round ${A.round} · ${s.reps[A.k]}`;
+  const cues = $('pCues'); cues.textContent = ''; ex.cues.forEach(c => { const li = document.createElement('li'); li.textContent = c; cues.appendChild(li); });
+  $('pNext').innerHTML = ''; $('pNext').append('Tap Done when finished. Next: ');
+  const b = document.createElement('b'); b.textContent = EX[s.moves[(A.k+1) % s.moves.length]].name; $('pNext').appendChild(b);
+  $('pSide').hidden = true;
+  say(`${s.reps[A.k]}. ${ex.name}.`);
+}
+function amrapStep(dir){
+  const s = P.segs[P.i], A = P.am, n = s.moves.length;
+  if (dir > 0){ A.k++; if (A.k >= n){ A.k = 0; A.round++; beep(1320, 160, .2); } }
+  else if (A.k > 0) A.k--;
+  else if (A.round > 1){ A.round--; A.k = n - 1; }
+  amrapShow();
+}
+const amrapRounds = () => P.am ? {r: P.am.round - 1, x: P.am.k} : null;
 function enterSeg(i){
+  const prev = P.segs[P.i];
+  if (prev && prev.kind === 'amrap' && i > P.i){ P.result = amrapRounds(); }
   P.i = i; P.el = 0; P.beeped = {};
   const s = P.segs[i]; const ex = EX[s.ex];
+  $('pSkip').textContent = s.kind === 'amrap' ? 'Done ›' : 'Skip ›';
+  $('pSkip').classList.toggle('pp', s.kind === 'amrap');
   const isRest = isBreak(s), isSwitch = s.kind === 'switch';
   pm.set(ex, isRest ? 0.6 : 1);
   $('pPhase').textContent = isSwitch ? 'Switch · next up' : isRest ? 'Rest · next up' : s.kind === 'warm' ? 'Warm-up' : s.kind === 'cool' ? 'Cool-down' : 'Work';
@@ -1292,6 +1461,8 @@ function enterSeg(i){
   $('pPhaseName').className = 'prog-ph ph-' + k;
   $('pPhaseName').innerHTML = PHASES[k].icon; $('pPhaseName').append(PHASES[k].name);
   P.leftShown = -1; renderProgress();
+  if (s.kind === 'amrap'){ P.am = P.am || {k:0, round:1}; beep(1320, 220, .22); amrapShow(); return; }
+  if (prev && prev.kind === 'amrap' && P.result){ say(`Time! ${P.result.r} rounds${P.result.x ? ' and ' + P.result.x + ' moves' : ''}.`); return; }
   if (isSwitch) say(`Next, ${ex.name}.`); else if (isRest) say(`Rest. Next, ${ex.name}.`); else say(ex.name + (ex.sided ? `. ${ex.switchCue || 'Switch sides'} halfway.` : ''));
   if (!isRest) beep(1320, 220, .22);
 }
@@ -1302,13 +1473,13 @@ function tickPlayer(now){
   if (!P.paused) P.el += dt;
   const rem = Math.max(0, s.sec - P.el);
   const secs = Math.ceil(rem);
-  $('pTime').textContent = secs;
+  $('pTime').textContent = s.kind === 'amrap' ? mmss(secs) : secs;
   $('pRing').setAttribute('stroke-dashoffset', (CIRC * (P.el / s.sec)).toFixed(1));
   renderProgress();
   if (!P.paused){
     for (const n of [3,2,1]) if (rem <= n && rem > n-1 && !P.beeped[n]){ P.beeped[n] = 1; beep(660, 110); }
     const ex = EX[s.ex];
-    if (ex.sided && !isBreak(s) && P.el >= s.sec/2 && !P.beeped.h){ P.beeped.h = 1; beep(990, 160); beep(990, 160); say(ex.switchCue || 'Switch sides'); $('pSide').textContent = ex.switchCue || 'Switch sides'; $('pSide').hidden = false; }
+    if (ex.sided && !isBreak(s) && s.kind !== 'amrap' && P.el >= s.sec/2 && !P.beeped.h){ P.beeped.h = 1; beep(990, 160); beep(990, 160); say(ex.switchCue || 'Switch sides'); $('pSide').textContent = ex.switchCue || 'Switch sides'; $('pSide').hidden = false; }
     if (P.el >= s.sec){ if (!isBreak(s)) P.done += s.sec; if (P.i < P.segs.length-1) enterSeg(P.i+1); else finish(true); }
   }
 }
@@ -1321,10 +1492,14 @@ function finish(complete){
   try { wake && wake.release(); } catch(e){} wake = null;
   if (complete || frac >= 0.5){
     state.log = state.log.filter(l => l.d !== tk);
-    state.log.push({d:tk, w:w.id, m: complete ? P.dur : minutes, v:P.ri});
+    const res = P.result || amrapRounds();
+    const entry = {d:tk, w:w.id, m: complete ? (isAmrap(P.dur) ? Math.round(P.total/60) : P.dur) : minutes, v:P.ri};
+    if (res) entry.r = res.r;
+    state.log.push(entry);
     chosen = null; chosenR = null; save();
     $('fTitle').textContent = complete ? 'Nice work.' : 'Good session.';
-    $('fText').textContent = `Workout ${w.id} · ${w.name} (${w.routines[P.ri].name}) is logged for today. ${nextPlannedLine()}`;
+    const rounds = res ? ` You did ${res.r} rounds${res.x ? ` and ${res.x} move${res.x > 1 ? 's' : ''}` : ''}.` : '';
+    $('fText').textContent = `Workout ${w.id} · ${w.name} (${w.routines[P.ri].name}) is logged for today.${rounds} ${nextPlannedLine()}`;
     beep(1320,200); setTimeout(()=>beep(1760,300),220); say(complete ? 'Workout complete. Nice work.' : 'Session logged.');
   } else {
     $('fTitle').textContent = 'Ended early.';
@@ -1337,8 +1512,8 @@ function nextPlannedLine(){ const t = today(); t.setDate(t.getDate()+1); const d
 function closePlayer(){ $('player').hidden = true; document.body.style.overflow = ''; try{ speechSynthesis.cancel(); }catch(e){} P = null; renderAll(); }
 $('startBtn').onclick = startWorkout;
 $('pPause').onclick = () => { if (!P) return; P.paused = !P.paused; $('pPause').textContent = P.paused ? 'Resume' : 'Pause'; if (P.paused) try{speechSynthesis.cancel()}catch(e){} };
-$('pSkip').onclick = () => { if (!P) return; const s = P.segs[P.i]; if (!isBreak(s)) P.done += Math.min(P.el, s.sec); if (P.i < P.segs.length-1) enterSeg(P.i+1); else finish(true); };
-$('pPrev').onclick = () => { if (!P) return; if (P.el > 3 || P.i === 0) enterSeg(P.i); else enterSeg(P.i-1); };
+$('pSkip').onclick = () => { if (!P) return; const s = P.segs[P.i]; if (s.kind === 'amrap'){ amrapStep(1); return; } if (!isBreak(s)) P.done += Math.min(P.el, s.sec); if (P.i < P.segs.length-1) enterSeg(P.i+1); else finish(true); };
+$('pPrev').onclick = () => { if (!P) return; if (P.segs[P.i].kind === 'amrap'){ if (P.am.k > 0 || P.am.round > 1) amrapStep(-1); else if (P.el <= 3) enterSeg(P.i-1); return; } if (P.el > 3 || P.i === 0) enterSeg(P.i); else enterSeg(P.i-1); };
 $('pEnd').onclick = () => { if (!P) return; if ($('pEnd').dataset.arm === '1'){ $('pEnd').dataset.arm = ''; $('pEnd').textContent = 'End workout'; finish(false); } else { $('pEnd').dataset.arm = '1'; $('pEnd').textContent = 'Tap again to end'; setTimeout(()=>{ $('pEnd').dataset.arm=''; $('pEnd').textContent='End workout'; }, 3000); } };
 $('fClose').onclick = closePlayer;
 document.addEventListener('keydown', e => { if (!P || $('player').hidden) return; if (e.code === 'Space'){ e.preventDefault(); $('pPause').click(); } });
