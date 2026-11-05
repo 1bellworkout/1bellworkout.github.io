@@ -29,7 +29,12 @@ This app was first built as a claude.ai artifact and then moved here as a plain 
 
      Keyframes loop in order with cosine easing.
   3. **3D coach**: Three.js r128 from cdnjs, UMD global `THREE`. `ZC` gives each move the sideways (z) positions of the elbows and hands, and marks the grip as `'two'` or `'one'`. `STYLES` / `styleRoles()` define the coach looks (athlete, wood mannequin, robot, crash dummy); `SKINS` holds the athlete's skin tones. A single shared `WebGLRenderer` draws every view: each `Coach3D` view renders into a viewport and copies the pixels to its own 2D canvas. This keeps the page to one WebGL context, even with 20 library cards. `makeView()` picks 3D, or falls back to the 2D `Mannequin`.
-  4. **Workouts / `FORMAT` / `buildSession()`**: workouts A–E, plus the timing of the 20- and 30-minute formats (warm-up, rounds, work/rest, cool-down).
+  4. **Workouts / `FORMAT` / `buildSession()`**: days A–E. Each day has:
+     - its own `warm` list (dynamic, bodyweight moves);
+     - its own `cool` list (static stretches for the muscles that day trains);
+     - 4 `routines` of 6 moves each, with the day's staple lifts in every routine.
+
+     `routineIndex()` picks the routine after the last one logged for that day, and log entries store it as `v`. `FORMAT` sets the 20- and 30-minute formats: how many warm-ups, moves and stretches; work/rest times; and `sw`, the 5 s "switch" break between warm-up moves and between stretches. Stretches last 30 s, or 40 s if one-sided (20 s per side). Segments carry `ph` (warm/main/cool) for the progress bar; `isBreak()` covers both rests and switches.
   5. **State + storage**: `state = {days, dur, log:[{d:'YYYY-MM-DD', w:'A', m:20}], coach:{style, skin}}`. Storage has three modes:
      - **Accounts** (`CLOUD`, when `config.js` is filled in): a sign-in gate (`#auth`, `body.gate`) using Supabase email + password: sign in, create an account, and "Forgot password?". A reset link fires `PASSWORD_RECOVERY`, which shows the `#authReset` form. Each user's state is cached in localStorage under `iron-thirty-v1:<uid>`. A `-dirty` flag marks changes the server hasn't confirmed yet. `push()` upserts the user's row in `plans`. `pull()` sends dirty changes, or otherwise takes the server copy; it runs on sign-in, on the `online` event and when the tab becomes visible. On a user's first sign-in, pre-accounts data under `iron-thirty-v1` is adopted and then removed. Sign-out removes that user's cache.
      - **claude.ai**: syncs to the artifact database through `window.claude.use('db')`.
@@ -48,11 +53,14 @@ This app was first built as a claude.ai artifact and then moved here as a plain 
 - To add an exercise:
   1. Add an entry to `EX` with at least two `keys`.
   2. Add a `ZC` row (elbow and hand z per side, plus grip).
-  3. Add it to a workout's `moves` list and to the library `order` array in `renderLib()`.
+  3. Add it to a routine's `moves`, or to a day's `warm`/`cool` list; give warm-ups the tag `'Warm-up'` and stretches `'Cool-down'`. The Moves library lists every `EX` entry automatically.
+- Watch the angle conventions when the torso tilts or lies down. Arm angles are absolute, measured from straight down, with positive meaning toward +x. So lying on the back (`b:-90`) adds 90 to a standing arm angle, and leaning forward (`b:72`) subtracts 72.
+- The rig shows one side-on plane. For hands that move sideways, a key can carry `zc` (its own `ZC` row plus a 6th value for bell z); the halo uses this to circle the head. The legs can't do this, so moves like windmills, Russian twists and lateral lunges are left out.
+- Day F (Bodyweight) is `extra`: it's pickable but outside the A–E `ROTATION`, and `bw` changes the "Grab your kettlebell" break to "Get ready". A routine can override timing with `format[dur]` (for example `work` as one value per move) and show rep targets with `reps`; the Halo Complex does both. A move with `switchCue` (the halo's "Switch direction") uses that wording at the halfway point instead of "Switch sides".
 - To check poses quickly, draw each key with `new Mannequin(el).draw(normalize(key))`.
 
 ## Ideas / next steps
 
 - Offer a log export/import as JSON. History saved in the claude.ai version does not carry over to accounts.
 - Add Google sign-in (`signInWithOAuth`) as an alternative to email codes.
-- Add progression tracking (e.g. reps per interval) and more moves (clean, halo, windmill, Turkish get-up).
+- Add progression tracking (e.g. reps per interval).

@@ -209,6 +209,119 @@ const EX = {
       {na:{u:168,l:325}, bell:'along', back:true},
       {na:{u:170,l:172}, bell:'along'}],
     cues:['Hold the bell by the horns overhead','Lower it behind your head, elbows pointing up','Extend to the top, ribs stay down']},
+  oneswing:{name:'One-Arm Swing', tag:'Hinge · power', tempo:1.7, sided:true, keys:[
+      {s:14,t:-58,b:62, na:{u:-25,l:-30}, fa:{u:-12,l:-12}, bell:'along'},
+      {s:0,t:0,b:-4, na:{u:92,l:92}, fa:{u:20,l:35}, bell:'along'}],
+    cues:['Same hip snap as the two-hand swing','Square shoulders: don’t let the bell twist you','Switch hands halfway']},
+  sldl:{name:'Single-Leg Deadlift', tag:'Hinge · balance', tempo:3.6, sided:true, keys:[
+      {ff:[-3,3], na:{u:0,l:0}, fa:{u:6,l:6}, bell:'hang'},
+      {s:8,t:-10,b:80, ff:[-88,70], ffv:[3,-12], na:{u:0,l:0}, fa:{u:-6,l:-6}, bell:'hang'}],
+    cues:['Stand on one leg, soft knee','Hinge forward as the free leg reaches back','Hips stay square; switch legs halfway']},
+  suitcase:{name:'Suitcase Deadlift', tag:'Hinge · core', tempo:3.2, sided:true, keys:[
+      {na:{u:0,l:0}, fa:{u:6,l:6}, bell:'hang'},
+      {s:25,t:-65,b:45, na:{u:0,l:0}, fa:{u:4,l:4}, bell:'hang'}],
+    cues:['Bell at your side like a suitcase','Sit hips back and down, chest up','Don’t lean toward the bell; switch hands halfway']},
+  clean:{name:'Kettlebell Clean', tag:'Hinge · power', tempo:2.6, sided:true, keys:[
+      {s:14,t:-55,b:58, na:{u:-15,l:-15}, fa:{u:-8,l:-8}, bell:'hang'},
+      {s:0,t:0,b:-3, na:{u:35,l:95}, fa:{u:12,l:20}, bell:'hang'},
+      {na:{u:15,l:170}, fa:{u:8,l:12}, bell:'rack'}],
+    cues:['Hike the bell back like a swing','Drive the hips and keep the bell close','Let it roll onto your forearm in the rack; switch halfway']},
+  cleanpress:{name:'Clean & Press', tag:'Full body', tempo:4.4, sided:true, keys:[
+      {s:14,t:-55,b:58, na:{u:-15,l:-15}, fa:{u:-8,l:-8}, bell:'hang'},
+      {na:{u:15,l:170}, fa:{u:8,l:12}, bell:'rack'},
+      {na:{u:176,l:178}, fa:{u:8,l:12}, bell:'rack'},
+      {na:{u:15,l:170}, fa:{u:8,l:12}, bell:'rack'}],
+    cues:['Clean the bell to the rack','Press straight overhead, glutes tight','Lower to the rack, then back down; switch halfway']},
+  kbgm:{name:'Goblet Good Morning', tag:'Hinge · hamstrings', tempo:3.4, keys:[
+      {na:goblet, bell:'hang'},
+      {s:10,t:-30,b:72, na:{u:-64,l:58}, bell:'hang'}],
+    cues:['Hug the bell to your chest','Push hips back until you feel the hamstrings','Flat back, then squeeze glutes to stand']},
+  slbridge:{name:'Single-Leg Glute Bridge', tag:'Glutes · single side', tempo:2.8, sided:true, keys:[
+      {...lie, ff:[81,56], ffv:[4,12], na:{u:84,l:84}},
+      {rx:25, s:27,t:-105.7,b:-105.7, ff:[87,51], ffv:[4,12], na:{u:84,l:84}}],
+    cues:['One foot planted, other leg straight','Drive through the heel and lift your hips','Keep hips level; switch legs halfway']},
+  splitsq:{name:'Goblet Split Squat', tag:'Legs · single side', tempo:3.2, sided:true, keys:[
+      {s:2,t:-35,b:3, ff:[-70,6], ffv:[7,-8], na:goblet, bell:'hang'},
+      {s:8,t:-80,b:4, ff:[-70,6], ffv:[7,-8], na:goblet, bell:'hang'}],
+    cues:['Feet stay split: one forward, one back','Drop straight down, back knee toward the floor','Drive up through the front heel; switch halfway']},
+  racksquat:{name:'Front-Rack Squat', tag:'Legs · core', tempo:3.4, sided:true, keys:[
+      {na:{u:15,l:170}, fa:{u:30,l:40}, bell:'rack'},
+      {s:38,t:-80,b:28, na:{u:30,l:170}, fa:{u:70,l:80}, bell:'rack'}],
+    cues:['Bell in the rack on one side','Squat deep without leaning away from it','Stand tall, brace your core; switch sides halfway']},
+  pushpress:{name:'Push Press', tag:'Shoulders · power', tempo:2.6, sided:true, keys:[
+      {na:{u:15,l:170}, fa:{u:3,l:3}, bell:'rack'},
+      {s:15,t:-15,b:2, na:{u:18,l:172}, fa:{u:3,l:3}, bell:'rack'},
+      {na:{u:176,l:178}, fa:{u:3,l:3}, bell:'rack'}],
+    cues:['Quick dip at the knees','Drive up with the legs to launch the press','Lock out overhead; switch halfway']},
+  kneelpress:{name:'Half-Kneeling Press', tag:'Shoulders · core', tempo:2.8, sided:true, keys:[
+      {s:8,t:-80,b:0, ff:[-74,8], ffv:[7,-8], na:{u:15,l:170}, fa:{u:3,l:3}, bell:'rack'},
+      {s:8,t:-80,b:0, ff:[-74,8], ffv:[7,-8], na:{u:176,l:178}, fa:{u:3,l:3}, bell:'rack'}],
+    cues:['Kneel on one knee, squeeze that glute','Press up without arching your back','Switch sides halfway']},
+  hornrow:{name:'Two-Hand Row', tag:'Back', tempo:2.4, keys:[
+      {s:15,t:-45,b:72, na:{u:-4,l:-4}, bell:'hang'},
+      {s:15,t:-45,b:72, na:{u:-62,l:-6}, bell:'hang'}],
+    cues:['Hinge forward, hold the bell by the horns','Row it to your lower ribs','Squeeze shoulder blades, lower slowly']},
+  gfloorpress:{name:'Two-Hand Floor Press', tag:'Chest · triceps', tempo:2.6, keys:[
+      {...lie, na:{u:86,l:180}, bell:'along'},
+      {...lie, na:{u:180,l:180}, bell:'along'}],
+    cues:['Lie down, bell held by the horns over your chest','Elbows touch the floor at the bottom','Press straight up, keep wrists stacked']},
+  skull:{name:'Lying Triceps Extension', tag:'Triceps', tempo:2.8, keys:[
+      {...lie, na:{u:180,l:180}, bell:'along'},
+      {...lie, na:{u:172,l:262}, bell:'along'}],
+    cues:['Lie down, arms straight up, bell by the horns','Bend only at the elbows, lowering behind your head','Squeeze triceps to straighten']},
+  hammer:{name:'Hammer Curl', tag:'Biceps · single arm', tempo:2.6, sided:true, keys:[
+      {na:{u:0,l:0}, fa:{u:3,l:3}, bell:'hang'},
+      {na:{u:8,l:150}, fa:{u:3,l:3}, bell:'hang'}],
+    cues:['Hold the handle, thumb up','Curl without swinging your body','Lower for three counts; switch halfway']},
+  frontraise:{name:'Front Raise', tag:'Shoulders', tempo:2.8, keys:[
+      {na:{u:0,l:0}, bell:'hang'},
+      {na:{u:88,l:88}, bell:'hang'}],
+    cues:['Hold the horns, arms nearly straight','Raise to shoulder height, no leaning back','Lower slowly']},
+  situp:{name:'Goblet Crunch', tag:'Core', tempo:2.6, keys:[
+      {...lie, na:{u:98,l:220}, bell:'hang'},
+      {...lie, b:-58, na:{u:66,l:188}, bell:'hang'}],
+    cues:['Lie on your back, bell hugged to your chest','Curl your shoulders off the floor','Exhale up, lower with control']},
+  climber:{name:'Mountain Climbers', tag:'Core · cardio', tempo:1.1, keys:[
+      {rx:-72,ay:6,fv:[4,-6],s:68,t:68,b:68, ff:[-72,6], ffv:[4,-6], na:{t:[64,2]}},
+      {rx:-72,ay:6,fv:[4,-6],s:68,t:68,b:68, ff:[-8,12], ffv:[4,-6], na:{t:[64,2]}}],
+    cues:['High plank, hands under shoulders','Drive knees toward your chest, one at a time','Hips stay low and steady']},
+  // Halo: the bell circles the head, so each key also sets the hands' sideways (z) position:
+  // zc = [right elbow z, right hand z, left elbow z, left hand z, grip, bell z].
+  halo:{name:'Halo', tag:'Shoulders · core', tempo:2, sided:true, switchCue:'Switch direction', keys:[
+      {na:{t:[16,163]}, bell:'along', zc:[20,4,-20,-4,'two',0]},
+      {na:{t:[3,171]}, bell:'along', zc:[22,22,-4,15,'two',19]},
+      {na:{t:[-13,160], k:1}, bell:'along', zc:[20,4,-20,-4,'two',0]},
+      {na:{t:[3,171]}, bell:'along', zc:[4,-15,-22,-22,'two',-19]}],
+    cues:['Hold the bell upside down by the horns at your chest','Circle it close around your head, ribs down','About 10 reps one way, then switch direction']},
+  standpullover:{name:'Standing Pullover', tag:'Lats · shoulders', tempo:3, keys:[
+      {na:{u:0,l:0}, bell:'along'},
+      {na:{u:188,l:196}, bell:'along'}],
+    cues:['Hold the horns, bell at your waist','Arms long: lift it up and over your head','Ribs down, then lower with control']},
+  // bodyweight main moves (Bodyweight day)
+  kneepush:{name:'Knee Push-Up', tag:'Chest · bodyweight', tempo:2.4, keys:[
+      {rx:-70, ay:4, fv:[-8,6], s:90, t:64, b:64, na:{t:[67,2]}},
+      {rx:-70, ay:4, fv:[-8,6], s:90, t:78, b:78, na:{t:[67,2]}}],
+    cues:['Knees down, hips in line with your back','Lower your chest between your hands','Push the floor away']},
+  superman:{name:'Superman', tag:'Back · bodyweight', tempo:3, keys:[
+      {rx:-80, ay:5, fv:[-12,-1], s:90, t:90, b:88, na:{u:96,l:96}},
+      {rx:-80, ay:9, fv:[-12,-1], s:96, t:92, b:80, na:{u:106,l:106}}],
+    cues:['Lie face down, arms reaching forward','Lift arms, chest and legs a few inches','Hold a beat, then lower slowly']},
+  birddog:{name:'Bird Dog', tag:'Core · bodyweight', tempo:3.2, sided:true, keys:[
+      {rx:-75, ay:4, fv:[-8,6], s:90, t:0, b:90, ff:[-75,4], ffv:[-8,6], na:{t:[27,2]}, fa:{t:[27,2]}},
+      {rx:-75, ay:4, fv:[-8,6], s:90, t:0, b:90, ff:[-119,52], ffv:[2,-12], na:{u:92,l:92}, fa:{t:[27,2]}}],
+    cues:['Hands and knees, back flat','Reach one arm forward and the opposite leg back','Don’t let your hips tip; switch sides halfway']},
+  bwsplit:{name:'Split Squat', tag:'Legs · bodyweight', tempo:3, sided:true, keys:[
+      {s:2,t:-35,b:3, ff:[-70,6], ffv:[7,-8], na:{u:20,l:160}},
+      {s:8,t:-80,b:4, ff:[-70,6], ffv:[7,-8], na:{u:20,l:160}}],
+    cues:['Feet split, one forward and one back','Lower straight down, back knee toward the floor','Switch legs halfway']},
+  bwsldl:{name:'Single-Leg Reach', tag:'Hinge · bodyweight', tempo:3.4, sided:true, keys:[
+      {ff:[-3,3], na:{u:0,l:0}},
+      {s:8,t:-10,b:80, ff:[-88,70], ffv:[3,-12], na:{u:0,l:0}}],
+    cues:['Balance on one leg','Hinge and reach toward the floor as the free leg goes back','Switch legs halfway']},
+  crunch:{name:'Crunch', tag:'Core · bodyweight', tempo:2.4, keys:[
+      {...lie, na:{u:98,l:220}},
+      {...lie, b:-58, na:{u:66,l:188}}],
+    cues:['Knees bent, hands across your chest','Curl your shoulders off the floor','Lower slowly']},
   // warm-up and cool-down (bodyweight)
   bwsquat:{name:'Bodyweight Squat', tag:'Warm-up', tempo:2.6, keys:[
       {na:{u:80,l:85}},
@@ -222,6 +335,22 @@ const EX = {
       {na:{u:0,l:0}},
       {na:{u:178,l:178}}],
     cues:['Raise both arms overhead','Reach tall, then lower','Loosen the shoulders']},
+  march:{name:'High-Knee March', tag:'Warm-up', tempo:1.6, sided:true, keys:[
+      {na:{u:-10,l:-10}, fa:{u:10,l:10}},
+      {ff:[44,48], ffv:[10,-6], na:{u:-35,l:-20}, fa:{u:40,l:85}}],
+    cues:['Drive the knee up to hip height','Swing the opposite arm','Stay tall; switch legs halfway']},
+  bwlunge:{name:'Reverse Lunge', tag:'Warm-up', tempo:3, sided:true, keys:[
+      {na:{u:20,l:160}},
+      {s:8,t:-80,b:4, ff:[-74,8], ffv:[7,-8], na:{u:20,l:160}}],
+    cues:['Hands at your chest','Step back and lower gently','Switch legs halfway']},
+  bwbridge:{name:'Glute Bridge', tag:'Warm-up', tempo:2.6, keys:[
+      {...lie, na:{u:84,l:84}},
+      {rx:25, s:27,t:-105.7,b:-105.7, na:{u:84,l:84}}],
+    cues:['Feet flat, knees bent','Squeeze your glutes to lift the hips','Lower slowly']},
+  pike:{name:'Plank to Down Dog', tag:'Warm-up', tempo:3.2, keys:[
+      {rx:-72,ay:6,fv:[4,-6],s:68,t:68,b:68, na:{t:[64,2]}},
+      {rx:-72,ay:6,fv:[10,-4],s:35,t:35,b:130, na:{t:[64,2]}}],
+    cues:['Start in a high plank','Push your hips up and back','Press your heels toward the floor, then return']},
   hipstretch:{name:'Hip Flexor Stretch', tag:'Cool-down', tempo:5, keys:[
       {s:8,t:-80,b:4, ff:[-74,8], ffv:[7,-8], na:{u:20,l:20}},
       {s:12,t:-78,b:2, ff:[-74,8], ffv:[7,-8], na:{u:20,l:20}}],
@@ -229,7 +358,39 @@ const EX = {
   fold:{name:'Forward Fold', tag:'Cool-down', tempo:5, keys:[
       {s:8,t:-18,b:118, na:{u:-20,l:-20}},
       {s:8,t:-18,b:122, na:{u:-22,l:-22}}],
-    cues:['Soft knees, let your head hang','Breathe slowly','Roll up one vertebra at a time']}
+    cues:['Soft knees, let your head hang','Breathe slowly','Roll up one vertebra at a time']},
+  quadstretch:{name:'Standing Quad Stretch', tag:'Cool-down', tempo:5, sided:true, keys:[
+      {ff:[-22,84], ffv:[-4,12], na:{u:80,l:80}, fa:{t:[-22,86], k:1}},
+      {ff:[-23,85], ffv:[-4,12], na:{u:82,l:82}, fa:{t:[-23,87], k:1}}],
+    cues:['Hold your foot behind you','Knees together, hips pushed slightly forward','Switch legs halfway']},
+  kneehug:{name:'Knee-to-Chest', tag:'Cool-down', tempo:5, sided:true, keys:[
+      {...lie, ff:[28,42], ffv:[10,6], na:{t:[6,52], k:1}},
+      {...lie, ff:[24,44], ffv:[10,6], na:{t:[3,54], k:1}}],
+    cues:['Lie on your back','Hug one knee toward your chest','Relax your low back; switch legs halfway']},
+  hamstretch:{name:'Kneeling Hamstring Stretch', tag:'Cool-down', tempo:5, sided:true, keys:[
+      {rx:40, s:-57.6,t:-57.6,b:55, fv:[4,12], ff:[-80,4], ffv:[-10,-3], na:{t:[28,24], k:1}},
+      {rx:40, s:-57.6,t:-57.6,b:60, fv:[4,12], ff:[-80,4], ffv:[-10,-3], na:{t:[32,20], k:1}}],
+    cues:['Kneel, front leg straight, toes up','Hinge forward with a flat back','Switch legs halfway']},
+  childpose:{name:'Child’s Pose', tag:'Cool-down', tempo:6, keys:[
+      {rx:-40, ay:4, fv:[-12,-2], s:90,t:-70,b:97, na:{t:[72,4]}},
+      {rx:-40, ay:4, fv:[-12,-2], s:90,t:-70,b:100, na:{t:[74,4]}}],
+    cues:['Sit back on your heels','Reach your arms long in front','Breathe into your back']},
+  cobra:{name:'Cobra Stretch', tag:'Cool-down', tempo:6, keys:[
+      {rx:-80, ay:5, fv:[-12,-1], ffv:[-12,-1], s:90,t:90,b:62, na:{t:[58,5], k:1}},
+      {rx:-80, ay:5, fv:[-12,-1], ffv:[-12,-1], s:90,t:90,b:58, na:{t:[58,5], k:1}}],
+    cues:['Lie face down, hands under shoulders','Press your chest up, hips stay down','Relax your shoulders away from ears']},
+  chest:{name:'Chest Opener', tag:'Cool-down', tempo:5, keys:[
+      {b:-4, na:{u:-32,l:-32}},
+      {b:-6, na:{u:-40,l:-40}}],
+    cues:['Clasp your hands behind your back','Lift your chest and draw the arms back','Breathe slowly']},
+  tristretch:{name:'Overhead Triceps Stretch', tag:'Cool-down', tempo:5, sided:true, keys:[
+      {na:{u:165,l:330}, fa:{t:[7,174]}},
+      {na:{u:168,l:334}, fa:{t:[6,176]}}],
+    cues:['Reach one hand down your back','Gently press the elbow with the other hand','Switch arms halfway']},
+  upperback:{name:'Upper-Back Stretch', tag:'Cool-down', tempo:5, keys:[
+      {b:6, na:{u:86,l:88}},
+      {b:10, na:{u:84,l:86}}],
+    cues:['Clasp your hands in front','Push them away and round your upper back','Tuck your chin, breathe into the shoulder blades']}
 };
 for (const id in EX){ EX[id].id = id; EX[id].nk = EX[id].keys.map(normalize); }
 EX.hipstretch.sided = true;
@@ -243,7 +404,17 @@ const ZC = {
   row:[17,15,-15,-11,'one'], press:[19,15,-17,-17,'one'], thruster:[13,5,-13,-5,'two'], highpull:[24,5,-24,-5,'two'],
   pushup:[23,20,-23,-20], floorpress:[19,15,-19,-20,'one'], bridge:[19,21,-19,-21], pullover:[10,5,-10,-5,'two'],
   plank:[14,11,-14,-11], curl:[15,5,-15,-5,'two'], tricep:[10,4.5,-10,-4.5,'two'], bwsquat:[16,13,-16,-13],
-  hinge:[17,-5,-17,5], armswing:[18,18,-18,-18], hipstretch:[18,17,-18,-17], fold:[15,9,-15,-9]
+  hinge:[17,-5,-17,5], armswing:[18,18,-18,-18], hipstretch:[18,17,-18,-17], fold:[15,9,-15,-9],
+  oneswing:[13,4,-17,-17,'one'], sldl:[17,10,-17,-14,'one'], suitcase:[18,19,-18,-19,'one'], clean:[19,15,-17,-17,'one'],
+  cleanpress:[19,15,-17,-17,'one'], kbgm:[13,5,-13,-5,'two'], slbridge:[19,21,-19,-21], splitsq:[13,5,-13,-5,'two'],
+  racksquat:[19,15,-17,-17,'one'], pushpress:[19,15,-17,-17,'one'], kneelpress:[19,15,-17,-17,'one'], hornrow:[16,5,-16,-5,'two'],
+  gfloorpress:[12,4,-12,-4,'two'], skull:[11,4,-11,-4,'two'], hammer:[16,16,-16,-16,'one'], frontraise:[13,5,-13,-5,'two'],
+  situp:[13,5,-13,-5,'two'], climber:[23,20,-23,-20],
+  march:[17,15,-17,-15], bwlunge:[17,-5,-17,5], bwbridge:[19,21,-19,-21], pike:[23,20,-23,-20],
+  quadstretch:[18,18,-15,-12], kneehug:[16,10,-16,-10], hamstretch:[16,12,-16,-12], childpose:[20,18,-20,-18],
+  cobra:[22,20,-22,-20], chest:[16,4,-16,-4], tristretch:[10,-2,-14,8], upperback:[16,3,-16,-3],
+  halo:[20,4,-20,-4,'two'], standpullover:[12,4,-12,-4,'two'], kneepush:[23,20,-23,-20], superman:[16,14,-16,-14],
+  birddog:[20,18,-20,-18], bwsplit:[17,-5,-17,5], bwsldl:[17,12,-17,-12], crunch:[13,5,-13,-5]
 };
 const SKINS = ['#F1CBA8','#D9A47C','#B07A55','#8A5A3B','#5E3C28'];
 const STYLES = {
@@ -365,7 +536,7 @@ function applyStyle(id, skin){
   P.jShR.scale.setScalar(id === 'athlete' ? 6.6 : 6); P.jShL.scale.copy(P.jShR.scale);
 }
 function poseFigure(p, ex){
-  const T = G.T, P = G.fig.P, J = solve(p), z = ZC[ex.id] || [17,17,-17,-17];
+  const T = G.T, P = G.fig.P, J = solve(p), z = p.zc || ZC[ex.id] || [17,17,-17,-17];
   const Yv = new T.Vector3(0,1,0), D = new T.Vector3();
   const V = (pt, zz) => new T.Vector3(pt[0], pt[1], zz);
   const place = (m, a, b, r) => { D.subVectors(b, a); const l = D.length() || 0.001; m.position.addVectors(a, b).multiplyScalar(.5); m.scale.set(r, l, r); m.quaternion.setFromUnitVectors(Yv, D.normalize()); };
@@ -391,7 +562,7 @@ function poseFigure(p, ex){
   const bi = bellInfo(p, J);
   P.bell.visible = !!bi;
   if (bi){
-    const bz = z[4] === 'one' ? z[1] : 0;
+    const bz = z[5] ?? (z[4] === 'one' ? z[1] : 0);
     P.bell.position.set(bi.c[0], bi.c[1], bz);
     const X = new T.Vector3(0,0,1), Y2 = new T.Vector3(bi.upv[0], bi.upv[1], 0), Z = new T.Vector3(-bi.upv[1], bi.upv[0], 0);
     P.bell.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(X, Y2, Z));
@@ -469,33 +640,113 @@ function makeView(host, opts={}){
   return m;
 }
 
+/* Each day has its own warm-up and cool-down and several routines that rotate.
+   - Warm-up: dynamic, bodyweight (raise heart rate, then mobilise and activate what the
+     day trains). Squats and good mornings are staples. The 20-min format uses the first 4.
+   - Routines: 6 moves; the 20-min format uses the first 5, so the 6th is a finisher (often
+     core). Explosive moves (swings, cleans, push press) come first, while you're fresh.
+     Each day's staple lifts appear in every routine; the rest rotate.
+   - Cool-down: static stretches for the muscles that day trained, held about 30 s
+     (20 s each side for one-sided stretches). The 20-min format uses the first 3. */
 const WORKOUTS = [
-  {id:'A', name:'Hinge Day', focus:'Swings, deadlifts and glutes — the backbone of kettlebell training.', moves:['swing','deadlift','row','lunge','bridge','plank']},
-  {id:'B', name:'Push & Pull', focus:'Upper body: pressing, rowing and pulling.', moves:['press','row','pushup','floorpress','highpull','pullover']},
-  {id:'C', name:'Legs & Core', focus:'Squats and lunges, finished with core work.', moves:['goblet','lunge','swing','bridge','pullover','plank']},
-  {id:'D', name:'Full Body', focus:'Big compound moves that hit everything.', moves:['thruster','swing','row','pushup','lunge','tricep']},
-  {id:'E', name:'Power & Arms', focus:'Explosive hips plus shoulders and arms.', moves:['swing','highpull','press','curl','tricep','floorpress']}
+  {id:'A', name:'Hinge Day', focus:'Swings, deadlifts and glutes — the backbone of kettlebell training.',
+    warm:['march','hinge','bwsquat','bwbridge','armswing'],
+    cool:['fold','hipstretch','kneehug','childpose'],
+    routines:[
+      {name:'Swing & Deadlift', moves:['swing','deadlift','row','lunge','bridge','plank']},
+      {name:'Single-Leg', moves:['swing','sldl','kbgm','slbridge','hornrow','plank']},
+      {name:'Power Hinge', moves:['oneswing','clean','deadlift','slbridge','row','climber']},
+      {name:'Strength Hinge', moves:['deadlift','swing','suitcase','kbgm','bridge','plank']}]},
+  {id:'B', name:'Push & Pull', focus:'Upper body: pressing, rowing and pulling.',
+    warm:['armswing','bwsquat','hinge','pike','march'],
+    cool:['chest','childpose','tristretch','upperback'],
+    routines:[
+      {name:'Classic', moves:['press','row','pushup','floorpress','highpull','pullover']},
+      {name:'Kneeling Strength', moves:['kneelpress','hornrow','pushup','gfloorpress','highpull','plank']},
+      {name:'Power Press', moves:['pushpress','row','pushup','floorpress','frontraise','pullover']},
+      {name:'Volume', moves:['kneelpress','row','pushup','gfloorpress','hornrow','pullover']}]},
+  {id:'C', name:'Legs & Core', focus:'Squats and lunges, finished with core work.',
+    warm:['march','bwsquat','bwlunge','hinge','bwbridge'],
+    cool:['quadstretch','hipstretch','cobra','hamstretch'],
+    routines:[
+      {name:'Squat & Lunge', moves:['goblet','lunge','swing','bridge','pullover','plank']},
+      {name:'Split Stance', moves:['goblet','splitsq','suitcase','slbridge','situp','plank']},
+      {name:'Balance & Core', moves:['goblet','lunge','sldl','bridge','situp','climber']},
+      {name:'Front Rack', moves:['goblet','racksquat','lunge','bridge','pullover','climber']}]},
+  {id:'D', name:'Full Body', focus:'Big compound moves that hit everything.',
+    warm:['march','bwsquat','hinge','pike','bwlunge'],
+    cool:['fold','quadstretch','chest','childpose'],
+    routines:[
+      {name:'Classic', moves:['thruster','swing','row','pushup','lunge','tricep']},
+      {name:'Clean & Press', moves:['cleanpress','goblet','swing','pushup','hornrow','climber']},
+      {name:'Athletic', moves:['thruster','clean','splitsq','row','pushup','situp']},
+      {name:'Conditioning', moves:['swing','thruster','lunge','hornrow','pushpress','plank']}]},
+  {id:'E', name:'Power & Arms', focus:'Explosive hips plus shoulders and arms.',
+    warm:['armswing','hinge','bwsquat','pike','march'],
+    cool:['tristretch','chest','childpose','fold'],
+    routines:[
+      {name:'Classic', moves:['swing','highpull','press','curl','tricep','floorpress']},
+      {name:'One-Arm Power', moves:['oneswing','pushpress','hammer','skull','highpull','frontraise']},
+      {name:'Clean & Arms', moves:['clean','press','curl','tricep','swing','gfloorpress']},
+      {name:'Pump', moves:['swing','cleanpress','hammer','skull','pushup','frontraise']},
+      // Rep-based complex: each set is ~10 halos each way, then ~10 pullovers.
+      {name:'Halo Complex', note:'Inspired by Garrett Merrill: each set is 10 halos one way, 10 the other, then 10 pullovers.',
+        moves:['halo','standpullover'], reps:{halo:'10 each way', standpullover:'10 reps'},
+        format:{20:{n:2, rounds:10, work:[40,30], rest:5, roundRest:20}, 30:{n:2, rounds:15, work:[40,30], rest:5, roundRest:20}}}]},
+  // Not in the A–E rotation: pick it for an easier day or when the kettlebell stays home.
+  {id:'F', name:'Bodyweight', extra:true, bw:true, focus:'No kettlebell needed: an easier day, or for when the bell stays home.',
+    warm:['march','bwsquat','hinge','armswing','bwbridge'],
+    cool:['fold','hipstretch','childpose','quadstretch'],
+    routines:[
+      {name:'Easy Day', moves:['bwsquat','kneepush','bwbridge','bwlunge','birddog','plank'],
+        format:{20:{work:30, rest:30}, 30:{work:35, rest:25}}},
+      {name:'Lower Body', moves:['bwsquat','bwsplit','slbridge','bwsldl','superman','crunch']},
+      {name:'Upper & Core', moves:['pushup','superman','pike','birddog','climber','plank']},
+      {name:'Full Body', moves:['bwsquat','pushup','bwlunge','superman','climber','plank']}]}
 ];
+const ROTATION = WORKOUTS.filter(w => !w.extra);
+// warmN/coolN: how many warm-up moves / stretches; sw: seconds to change position between them.
 const FORMAT = {
-  20:{warm:['bwsquat','hinge','armswing'], warmSec:40, n:5, rounds:3, work:40, rest:20, roundRest:30, cool:['hipstretch','fold'], coolSec:60},
-  30:{warm:['bwsquat','hinge','armswing'], warmSec:60, n:6, rounds:4, work:45, rest:15, roundRest:20, cool:['hipstretch','fold'], coolSec:60}
+  20:{warmN:4, warmSec:30, n:5, rounds:3, work:40, rest:20, roundRest:30, coolN:3, sw:5},
+  30:{warmN:5, warmSec:35, n:6, rounds:4, work:45, rest:15, roundRest:20, coolN:4, sw:5}
 };
-function buildSession(w, dur){
-  const F = FORMAT[dur], segs = [];
-  F.warm.forEach((m,i)=>segs.push({kind:'warm', ex:m, sec:F.warmSec, label:`Warm-up ${i+1} of ${F.warm.length}`}));
-  const moves = w.moves.slice(0, F.n);
+const stretchSec = id => EX[id].sided ? 40 : 30;
+// Which routine of a day comes next: the one after the last you did, else by count.
+function routineIndex(w){
+  const mine = state.log.filter(l => l.w === w.id).sort((a,b) => a.d < b.d ? -1 : 1);
+  const last = mine[mine.length-1];
+  const i = last && Number.isInteger(last.v) ? last.v + 1 : mine.length;
+  return i % w.routines.length;
+}
+// A routine can override the day's timing (format[dur]) — e.g. the halo complex's 10 sets.
+const fmt = (R, dur) => Object.assign({}, FORMAT[dur], R.format && R.format[dur]);
+function buildSession(w, dur, ri){
+  const R = w.routines[ri], F = fmt(R, dur), segs = [];
+  const warm = w.warm.slice(0, F.warmN), cool = w.cool.slice(0, F.coolN), moves = R.moves.slice(0, F.n);
+  const workSec = i => Array.isArray(F.work) ? F.work[i] : F.work;
+  const word = R.reps ? 'Set' : 'Round';
+  warm.forEach((m,i) => {
+    if (i) segs.push({kind:'switch', ph:'warm', ex:m, sec:F.sw, label:'Switch'});
+    segs.push({kind:'warm', ph:'warm', ex:m, sec:F.warmSec, label:`Warm-up ${i+1} of ${warm.length}`});
+  });
+  segs.push({kind:'rest', ph:'main', ex:moves[0], sec:10, label: w.bw ? 'Warm-up done · Get ready' : 'Warm-up done · Grab your kettlebell'});
   for (let r=1; r<=F.rounds; r++){
     moves.forEach((m,i)=>{
-      segs.push({kind:'work', ex:m, sec:F.work, label:`Round ${r} of ${F.rounds} · Move ${i+1} of ${moves.length}`});
+      const reps = R.reps && R.reps[m] ? ` · ${R.reps[m]}` : ` · Move ${i+1} of ${moves.length}`;
+      segs.push({kind:'work', ph:'main', ex:m, sec:workSec(i), label:`${word} ${r} of ${F.rounds}${reps}`});
       const last = i === moves.length-1;
-      if (!last) segs.push({kind:'rest', ex:moves[i+1], sec:F.rest, label:`Round ${r} of ${F.rounds} · Rest`});
-      else if (r < F.rounds) segs.push({kind:'rest', ex:moves[0], sec:F.roundRest, label:`Round ${r} done · Catch your breath`});
+      if (!last) segs.push({kind: F.rest <= F.sw ? 'switch' : 'rest', ph:'main', ex:moves[i+1], sec:F.rest, label: F.rest <= F.sw ? 'Switch' : `${word} ${r} of ${F.rounds} · Rest`});
+      else if (r < F.rounds) segs.push({kind:'rest', ph:'main', ex:moves[0], sec:F.roundRest, label:`${word} ${r} done · Catch your breath`});
     });
   }
-  segs.push({kind:'rest', ex:F.cool[0], sec:15, label:'Main set done · Cool-down next'});
-  F.cool.forEach((m,i)=>segs.push({kind:'cool', ex:m, sec:F.coolSec, label:`Cool-down ${i+1} of ${F.cool.length}`}));
+  segs.push({kind:'rest', ph:'cool', ex:cool[0], sec:10, label:'Main set done · Cool-down next'});
+  cool.forEach((m,i) => {
+    if (i) segs.push({kind:'switch', ph:'cool', ex:m, sec:F.sw, label:'Switch'});
+    segs.push({kind:'cool', ph:'cool', ex:m, sec:stretchSec(m), label:`Cool-down ${i+1} of ${cool.length}`});
+  });
   return segs;
 }
+const isBreak = s => s.kind === 'rest' || s.kind === 'switch';
 const totalSec = segs => segs.reduce((a,s)=>a+s.sec,0);
 
 /* ============ State + storage ============ */
@@ -513,7 +764,7 @@ function cleanState(d){
   return {
     days: Array.isArray(d.days) ? d.days.filter(x => Number.isInteger(x) && x >= 0 && x < 7) : DEFAULT.days.slice(),
     dur: d.dur === 30 ? 30 : 20,
-    log: Array.isArray(d.log) ? d.log.filter(x => x && /^\d{4}-\d\d-\d\d$/.test(x.d) && WORKOUTS.some(w => w.id === x.w)).map(x => ({d:x.d, w:x.w, m:+x.m || 0})) : [],
+    log: Array.isArray(d.log) ? d.log.filter(x => x && /^\d{4}-\d\d-\d\d$/.test(x.d) && WORKOUTS.some(w => w.id === x.w)).map(x => Object.assign({d:x.d, w:x.w, m:+x.m || 0}, Number.isInteger(x.v) && x.v >= 0 && x.v < 10 ? {v:x.v} : {})) : [],
     coach: cleanCoach(d.coach)
   };
 }
@@ -585,7 +836,7 @@ function adopt(user){
   const same = user.id === uid;
   uid = user.id; userEmail = user.email || '';
   lsSet(LSK + '-uid', uid); lsSet(LSK + '-email', userEmail);
-  if (!same){ state = cleanState(parse(lsGet(ck())) || DEFAULT); dur = state.dur; chosen = null; preview = null; pulled = false; }
+  if (!same){ state = cleanState(parse(lsGet(ck())) || DEFAULT); dur = state.dur; chosen = null; chosenR = null; preview = null; pulled = false; }
   gate(recovering); renderAll();
   if (!pulled) pull();
 }
@@ -593,7 +844,7 @@ function dropAccount(){
   if (uid){ lsDel(ck()); lsDel(ck() + '-dirty'); }
   lsDel(LSK + '-uid'); lsDel(LSK + '-email');
   uid = null; userEmail = ''; pulled = false; storeMode = 'pending';
-  state = cleanState(DEFAULT); dur = state.dur; chosen = null; preview = null;
+  state = cleanState(DEFAULT); dur = state.dur; chosen = null; chosenR = null; preview = null;
   if (recovering) showReset(false);
   gate(true); renderAll();
 }
@@ -726,13 +977,16 @@ const today = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const logFor = key => state.log.find(l => l.d === key);
-function nextWorkout(){ const n = state.log.length; const last = state.log.slice().sort((a,b)=>a.d<b.d?-1:1).pop();
-  if (last){ const i = WORKOUTS.findIndex(w=>w.id===last.w); if (i>=0) return WORKOUTS[(i+1)%WORKOUTS.length]; }
-  return WORKOUTS[n % WORKOUTS.length]; }
+// Rotation A–E; Bodyweight days (extra) don't move it along.
+function nextWorkout(){ const rot = state.log.filter(l => ROTATION.some(w => w.id === l.w)); const last = rot.sort((a,b)=>a.d<b.d?-1:1).pop();
+  if (last){ const i = ROTATION.findIndex(w=>w.id===last.w); if (i>=0) return ROTATION[(i+1)%ROTATION.length]; }
+  return ROTATION[rot.length % ROTATION.length]; }
 function nextPlannedDate(from){ for (let i=0;i<14;i++){ const d = new Date(from); d.setDate(d.getDate()+i); if (state.days.includes(d.getDay()) && !logFor(ymd(d))) return d; } return null; }
 
 /* ============ Today view ============ */
-let chosen = null, dur = state.dur, preview = null;
+let chosen = null, chosenR = null, dur = state.dur, preview = null;
+// The workout day and routine Start will run: your picks, else what's up next.
+function plan(){ const w = chosen || nextWorkout(); const ri = chosenR ?? routineIndex(w); return {w, ri, R: w.routines[ri]}; }
 const $ = id => document.getElementById(id);
 const hero = makeView($('heroStage'), {interactive:true, label:'3D coach demonstrating the selected move'});
 const minis = [];
@@ -742,7 +996,7 @@ function setPreview(id){
   document.querySelectorAll('#sessMoves button').forEach(b => b.setAttribute('aria-current', b.dataset.ex === id ? 'true':'false'));
 }
 function renderToday(){
-  const w = chosen || nextWorkout();
+  const {w, ri, R} = plan();
   const t = today(), tk = ymd(t), doneToday = logFor(tk);
   const planned = state.days.includes(t.getDay());
   let eyebrow;
@@ -753,26 +1007,42 @@ function renderToday(){
   $('sessEyebrow').textContent = eyebrow;
   $('sessTitle').textContent = w.name;
   $('sessFocus').textContent = w.focus;
-  const F = FORMAT[dur];
-  $('sessSpec').textContent = `${F.n} moves × ${F.rounds} rounds · ${F.work}s on / ${F.rest}s off`;
+  const F = fmt(R, dur);
+  $('sessSpec').textContent = R.reps
+    ? `${F.rounds} sets · ${R.moves.map(m => `${R.reps[m]} ${EX[m].name.toLowerCase()}`).join(' + ')}`
+    : `${F.n} moves × ${F.rounds} rounds · ${F.work}s on / ${F.rest}s off`;
+  $('routineNote').textContent = R.note || ''; $('routineNote').hidden = !R.note;
   ['d20','d30'].forEach(id => $(id).setAttribute('aria-pressed', String(+$(id).dataset.d === dur)));
+  const pr = $('pickR'); pr.textContent = '';
+  const upR = routineIndex(w);
+  w.routines.forEach((r, j) => {
+    const b = document.createElement('button'); b.setAttribute('aria-pressed', String(j === ri));
+    b.textContent = r.name;
+    if (j === upR){ const s = document.createElement('span'); s.className = 'up'; s.textContent = 'up next'; b.appendChild(s); }
+    b.addEventListener('click', () => { chosenR = (j === upR) ? null : j; preview = null; renderToday(); });
+    pr.appendChild(b);
+  });
+  $('routineLbl').textContent = `Routine ${ri+1} of ${w.routines.length}`;
+  const names = ids => ids.map(id => EX[id].name).join(', ');
+  $('sessWarm').textContent = names(w.warm.slice(0, F.warmN));
+  $('sessCool').textContent = names(w.cool.slice(0, F.coolN));
   const ol = $('sessMoves'); ol.textContent = '';
-  w.moves.slice(0, F.n).forEach((m,i) => {
+  R.moves.slice(0, F.n).forEach((m,i) => {
     const li = document.createElement('li'); const b = document.createElement('button'); b.dataset.ex = m;
     b.innerHTML = `<span class="ix">${i+1}</span><span class="nm"></span><span class="tg"></span>`;
     b.querySelector('.nm').textContent = EX[m].name; b.querySelector('.tg').textContent = EX[m].tag;
     b.addEventListener('click', () => setPreview(m));
     li.appendChild(b); ol.appendChild(li);
   });
-  const mv = w.moves.slice(0,F.n);
+  const mv = R.moves.slice(0,F.n);
   if (!preview || !mv.includes(preview)) setPreview(mv[0]); else setPreview(preview);
   const nxt = nextWorkout();
   const pk = $('pickW'); pk.textContent = '';
   WORKOUTS.forEach(x => {
     const b = document.createElement('button'); b.setAttribute('aria-pressed', String(x.id === w.id));
-    b.textContent = `${x.id} · ${x.name}`;
+    b.textContent = x.extra ? `${x.name} (no bell)` : `${x.id} · ${x.name}`;
     if (x.id === nxt.id){ const s = document.createElement('span'); s.className='up'; s.textContent='up next'; b.appendChild(s); }
-    b.addEventListener('click', () => { chosen = (x.id === nxt.id) ? null : x; preview = null; renderToday(); });
+    b.addEventListener('click', () => { chosen = (x.id === nxt.id) ? null : x; chosenR = null; preview = null; renderToday(); });
     pk.appendChild(b);
   });
   // week strip
@@ -817,7 +1087,7 @@ function renderSched(){
     b.setAttribute('aria-label', `${MON[dt.getMonth()]} ${d}${lg ? ', done: workout '+lg.w : isPlan ? ', planned' : ''}`);
     if (dt <= tdate) b.onclick = () => {
       if (lg) state.log = state.log.filter(x => x.d !== k);
-      else state.log.push({d:k, w:nextWorkout().id, m:state.dur});
+      else { const nw = nextWorkout(); state.log.push({d:k, w:nw.id, m:state.dur, v:routineIndex(nw)}); }
       save();
     }; else b.style.cursor = 'default';
     cal.appendChild(b);
@@ -833,7 +1103,7 @@ function renderSched(){
   if (!sorted.length){ const li = document.createElement('li'); li.innerHTML = '<span>No sessions yet. Finish a workout and it lands here automatically.</span>'; h.appendChild(li); }
   sorted.forEach(l => { const w = WORKOUTS.find(x=>x.id===l.w) || {name:'Workout'}; const [y,m,d] = l.d.split('-').map(Number); const dt = new Date(y,m-1,d);
     const li = document.createElement('li'); li.innerHTML = '<b></b><span></span>';
-    li.querySelector('b').textContent = `${l.w} · ${w.name}`; li.querySelector('span').textContent = `${DOW[dt.getDay()]} ${MON[m-1].slice(0,3)} ${d} · ${l.m} min`; h.appendChild(li); });
+    li.querySelector('b').textContent = `${l.w} · ${w.name}` + (w.routines && w.routines[l.v] ? ` · ${w.routines[l.v].name}` : ''); li.querySelector('span').textContent = `${DOW[dt.getDay()]} ${MON[m-1].slice(0,3)} ${d} · ${l.m} min`; h.appendChild(li); });
   renderAcct();
 }
 $('calPrev').onclick = () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()-1, 1); renderSched(); };
@@ -843,9 +1113,11 @@ $('dd30').onclick = () => { state.dur = 30; dur = 30; save(); };
 
 /* ============ Moves library ============ */
 const libIO = ('IntersectionObserver' in window) ? new IntersectionObserver(es => es.forEach(e => { if (e.target._view) e.target._view.visible = e.isIntersecting; }), {rootMargin:'100px'}) : null;
+const grp = ex => ex.tag === 'Warm-up' ? 1 : ex.tag === 'Cool-down' ? 2 : 0;
 function renderLib(){
   const lib = $('lib'); if (lib.childElementCount) return;
-  const order = ['swing','deadlift','goblet','lunge','row','press','thruster','highpull','pushup','floorpress','bridge','pullover','plank','curl','tricep','bwsquat','hinge','armswing','hipstretch','fold'];
+  // Every move: main lifts first, then warm-ups, then stretches (EX is defined in that order).
+  const order = Object.keys(EX).sort((a,b) => grp(EX[a]) - grp(EX[b]));
   order.forEach(id => {
     const ex = EX[id]; const card = document.createElement('article'); card.className = 'mv';
     const st = document.createElement('div'); st.className = 'st'; card.appendChild(st);
@@ -853,7 +1125,7 @@ function renderLib(){
     const bd = document.createElement('div'); bd.className = 'bd';
     bd.innerHTML = `<div class="meta"><span></span><span class="num"></span></div><h3></h3><ul></ul><a target="_blank" rel="noopener">Watch a real person do it ↗</a>`;
     bd.querySelector('.meta span').textContent = ex.tag;
-    bd.querySelector('.meta .num').textContent = ex.sided ? 'each side' : `${ex.tempo.toFixed(1)}s / rep`;
+    bd.querySelector('.meta .num').textContent = ex.sided ? (ex.switchCue ? 'each direction' : 'each side') : `${ex.tempo.toFixed(1)}s / rep`;
     bd.querySelector('h3').textContent = ex.name;
     ex.cues.forEach(c => { const li = document.createElement('li'); li.textContent = c; bd.querySelector('ul').appendChild(li); });
     bd.querySelector('a').href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(ex.name + (ex.tag.startsWith('Warm')||ex.tag.startsWith('Cool') ? '' : ' kettlebell') + ' proper form');
@@ -948,9 +1220,9 @@ function say(txt){
   try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.rate = 1.02; speechSynthesis.speak(u); } catch(e){}
 }
 function startWorkout(){
-  const w = chosen || nextWorkout();
-  const segs = buildSession(w, dur);
-  P = {w, dur, segs, i:0, el:0, paused:false, last:performance.now(), beeped:{}, done:0};
+  const {w, ri} = plan();
+  const segs = buildSession(w, dur, ri);
+  P = {w, ri, dur, segs, i:0, el:0, paused:false, last:performance.now(), beeped:{}, done:0};
   try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume && audio.resume(); } catch(e){}
   try { navigator.wakeLock && navigator.wakeLock.request('screen').then(l => wake = l).catch(()=>{}); } catch(e){}
   $('player').hidden = false; $('pIn').hidden = false; $('pDone').hidden = true;
@@ -967,7 +1239,7 @@ const PHASES = {
   main: {name:'Main set',  icon:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 2h8a3 3 0 0 1 3 3v2a3 3 0 0 1-1 2.2A7.5 7.5 0 1 1 6 9.2 3 3 0 0 1 5 7V5a3 3 0 0 1 3-3zm0 2a1 1 0 0 0-1 1v2c0 .2 0 .4.2.5A7.5 7.5 0 0 1 12 6.5c1.8 0 3.5.6 4.8 1.6l.2-.1V5a1 1 0 0 0-1-1z"/></svg>'},
   cool: {name:'Cool-down', icon:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 3.5l3 2 3-2M9 20.5l3-2 3 2"/></svg>'}
 };
-const phaseOf = s => s.kind === 'warm' ? 'warm' : s.kind === 'cool' ? 'cool' : 'main';
+const phaseOf = s => s.ph || (s.kind === 'warm' ? 'warm' : s.kind === 'cool' ? 'cool' : 'main');
 const mmss = t => `${Math.floor(t/60)}:${pad(Math.floor(t%60))}`;
 function buildProgress(segs){
   const bar = $('pBar'); bar.textContent = '';
@@ -983,7 +1255,7 @@ function buildProgress(segs){
       bar.appendChild(grp); P.groups[k] = grp;
     }
     grp._sec += s.sec; grp.style.flexGrow = grp._sec;
-    const i = document.createElement('i'); i.style.flexGrow = s.sec; if (s.kind === 'rest') i.className = 'rest';
+    const i = document.createElement('i'); i.style.flexGrow = s.sec; if (isBreak(s)) i.className = 'rest';
     grp.querySelector('.ph-segs').appendChild(i); P.bars.push(i);
   });
 }
@@ -1000,16 +1272,17 @@ function renderProgress(){
 function enterSeg(i){
   P.i = i; P.el = 0; P.beeped = {};
   const s = P.segs[i]; const ex = EX[s.ex];
-  const isRest = s.kind === 'rest';
+  const isRest = isBreak(s), isSwitch = s.kind === 'switch';
   pm.set(ex, isRest ? 0.6 : 1);
-  $('pPhase').textContent = isRest ? 'Rest · next up' : s.kind === 'warm' ? 'Warm-up' : s.kind === 'cool' ? 'Cool-down' : 'Work';
+  $('pPhase').textContent = isSwitch ? 'Switch · next up' : isRest ? 'Rest · next up' : s.kind === 'warm' ? 'Warm-up' : s.kind === 'cool' ? 'Cool-down' : 'Work';
   $('pPhase').className = 'p-phase' + (isRest ? ' rest' : '');
   $('pName').textContent = ex.name;
   $('pRound').textContent = s.label;
   const cues = $('pCues'); cues.textContent = ''; ex.cues.forEach(c => { const li = document.createElement('li'); li.textContent = c; cues.appendChild(li); });
-  const nx = P.segs.slice(i+1).find(x => x.kind !== 'rest');
+  const nx = P.segs.slice(i+1).find(x => !isBreak(x));
   $('pNext').innerHTML = '';
-  if (isRest){ $('pNext').append('Get set. Starts when the timer hits zero.'); }
+  if (isSwitch){ $('pNext').append('Get into position.'); }
+  else if (isRest){ $('pNext').append('Get set. Starts when the timer hits zero.'); }
   else if (nx){ $('pNext').append('Next: '); const b = document.createElement('b'); b.textContent = EX[nx.ex].name; $('pNext').appendChild(b); }
   else $('pNext').append('Last one!');
   $('pSide').hidden = true;
@@ -1019,7 +1292,7 @@ function enterSeg(i){
   $('pPhaseName').className = 'prog-ph ph-' + k;
   $('pPhaseName').innerHTML = PHASES[k].icon; $('pPhaseName').append(PHASES[k].name);
   P.leftShown = -1; renderProgress();
-  if (isRest) say(`Rest. Next, ${ex.name}.`); else say(ex.name + (ex.sided ? '. Switch sides halfway.' : ''));
+  if (isSwitch) say(`Next, ${ex.name}.`); else if (isRest) say(`Rest. Next, ${ex.name}.`); else say(ex.name + (ex.sided ? `. ${ex.switchCue || 'Switch sides'} halfway.` : ''));
   if (!isRest) beep(1320, 220, .22);
 }
 function tickPlayer(now){
@@ -1035,23 +1308,23 @@ function tickPlayer(now){
   if (!P.paused){
     for (const n of [3,2,1]) if (rem <= n && rem > n-1 && !P.beeped[n]){ P.beeped[n] = 1; beep(660, 110); }
     const ex = EX[s.ex];
-    if (ex.sided && s.kind !== 'rest' && P.el >= s.sec/2 && !P.beeped.h){ P.beeped.h = 1; beep(990, 160); beep(990, 160); say('Switch sides'); $('pSide').hidden = false; }
-    if (P.el >= s.sec){ if (s.kind !== 'rest') P.done += s.sec; if (P.i < P.segs.length-1) enterSeg(P.i+1); else finish(true); }
+    if (ex.sided && !isBreak(s) && P.el >= s.sec/2 && !P.beeped.h){ P.beeped.h = 1; beep(990, 160); beep(990, 160); say(ex.switchCue || 'Switch sides'); $('pSide').textContent = ex.switchCue || 'Switch sides'; $('pSide').hidden = false; }
+    if (P.el >= s.sec){ if (!isBreak(s)) P.done += s.sec; if (P.i < P.segs.length-1) enterSeg(P.i+1); else finish(true); }
   }
 }
 function finish(complete){
   const w = P.w; const tk = ymd(today());
-  const worked = P.done + (P.segs[P.i].kind !== 'rest' ? Math.min(P.el, P.segs[P.i].sec) : 0);
-  const frac = worked / P.segs.filter(s=>s.kind!=='rest').reduce((a,s)=>a+s.sec,0);
+  const worked = P.done + (!isBreak(P.segs[P.i]) ? Math.min(P.el, P.segs[P.i].sec) : 0);
+  const frac = worked / P.segs.filter(s=>!isBreak(s)).reduce((a,s)=>a+s.sec,0);
   const minutes = Math.round(totalSec(P.segs.slice(0, P.i+1))/60) || 1;
   $('pIn').hidden = true; $('pDone').hidden = false;
   try { wake && wake.release(); } catch(e){} wake = null;
   if (complete || frac >= 0.5){
     state.log = state.log.filter(l => l.d !== tk);
-    state.log.push({d:tk, w:w.id, m: complete ? P.dur : minutes});
-    chosen = null; save();
+    state.log.push({d:tk, w:w.id, m: complete ? P.dur : minutes, v:P.ri});
+    chosen = null; chosenR = null; save();
     $('fTitle').textContent = complete ? 'Nice work.' : 'Good session.';
-    $('fText').textContent = `Workout ${w.id} · ${w.name} is logged for today. ${nextPlannedLine()}`;
+    $('fText').textContent = `Workout ${w.id} · ${w.name} (${w.routines[P.ri].name}) is logged for today. ${nextPlannedLine()}`;
     beep(1320,200); setTimeout(()=>beep(1760,300),220); say(complete ? 'Workout complete. Nice work.' : 'Session logged.');
   } else {
     $('fTitle').textContent = 'Ended early.';
@@ -1059,11 +1332,12 @@ function finish(complete){
   }
 }
 function nextPlannedLine(){ const t = today(); t.setDate(t.getDate()+1); const d = nextPlannedDate(t); const n = nextWorkout();
-  return d ? `Next up: Workout ${n.id} (${n.name}) on ${DOW[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}.` : `Next up: Workout ${n.id}.`; }
+  const nm = `${n.name}: ${n.routines[routineIndex(n)].name}`;
+  return d ? `Next up: Workout ${n.id} (${nm}) on ${DOW[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}.` : `Next up: Workout ${n.id} (${nm}).`; }
 function closePlayer(){ $('player').hidden = true; document.body.style.overflow = ''; try{ speechSynthesis.cancel(); }catch(e){} P = null; renderAll(); }
 $('startBtn').onclick = startWorkout;
 $('pPause').onclick = () => { if (!P) return; P.paused = !P.paused; $('pPause').textContent = P.paused ? 'Resume' : 'Pause'; if (P.paused) try{speechSynthesis.cancel()}catch(e){} };
-$('pSkip').onclick = () => { if (!P) return; const s = P.segs[P.i]; if (s.kind !== 'rest') P.done += Math.min(P.el, s.sec); if (P.i < P.segs.length-1) enterSeg(P.i+1); else finish(true); };
+$('pSkip').onclick = () => { if (!P) return; const s = P.segs[P.i]; if (!isBreak(s)) P.done += Math.min(P.el, s.sec); if (P.i < P.segs.length-1) enterSeg(P.i+1); else finish(true); };
 $('pPrev').onclick = () => { if (!P) return; if (P.el > 3 || P.i === 0) enterSeg(P.i); else enterSeg(P.i-1); };
 $('pEnd').onclick = () => { if (!P) return; if ($('pEnd').dataset.arm === '1'){ $('pEnd').dataset.arm = ''; $('pEnd').textContent = 'End workout'; finish(false); } else { $('pEnd').dataset.arm = '1'; $('pEnd').textContent = 'Tap again to end'; setTimeout(()=>{ $('pEnd').dataset.arm=''; $('pEnd').textContent='End workout'; }, 3000); } };
 $('fClose').onclick = closePlayer;

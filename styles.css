@@ -76,6 +76,10 @@ main{padding-block:24px 64px}
 .pick button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600}
 .pick button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 .pick button .up{font-size:11px;color:var(--muted);font-weight:500;margin-left:4px}
+.routine{display:grid;gap:6px;margin:0 0 16px}
+.wc{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0 0 16px;font-size:13px}
+.wc dt{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.wc dd{margin:0;color:var(--ink)}
 
 .week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 .day{border:1px solid var(--line);border-radius:10px;padding:8px 6px;text-align:center;background:var(--surface);min-height:74px;display:grid;align-content:start;gap:2px}
