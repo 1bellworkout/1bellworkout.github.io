@@ -1136,7 +1136,8 @@ function nextWorkout(){ const rot = state.log.filter(l => ROTATION.some(w => w.i
 function nextPlannedDate(from){ for (let i=0;i<14;i++){ const d = new Date(from); d.setDate(d.getDate()+i); if (state.days.includes(d.getDay()) && !logFor(ymd(d))) return d; } return null; }
 
 /* ============ Real-person clips ============ */
-// YouTube clips of a real person doing a move: v = video id, s/e = start/end second, day = Garrett Merrill's Day number.
+// YouTube clips of a real person doing a move: v = video id, s/e = start/end second, and either
+// day = Garrett Merrill's Day number or by = the channel's name.
 // Played in an embed (youtube-nocookie) inside #clipDlg; moves without a clip just don't show the button.
 // Times come from his captions, so a clip can start a second or two early or late.
 const CLIPS = {
@@ -1158,7 +1159,27 @@ const CLIPS = {
   legraise:{v:"uzh3jG3HhfA", s:29, e:38, day:35}, crabdip:{v:"IyZHpNwHzic", s:20, e:28, day:13},
   calfraise:{v:"VAT4xoMfoJk", s:25, e:30, day:3}, aroundworld:{v:"p8lFKNZXEqQ", s:53, e:62, day:31},
   throwover:{v:"4GQQaD3FUqA", s:28, e:35, day:27}, highpull1:{v:"c_WokPzdME8", s:8, e:16, day:17},
-  swingsquat:{v:"uzh3jG3HhfA", s:8, e:16, day:35}, bwsquat:{v:"VAT4xoMfoJk", s:29, e:40, day:3}
+  swingsquat:{v:"uzh3jG3HhfA", s:8, e:16, day:35}, bwsquat:{v:"VAT4xoMfoJk", s:29, e:40, day:3},
+  // Moves he doesn't do: short demos from other channels (by = channel, shown as the credit).
+  pullover:{v:"49AFHKEB-I4", s:0, e:13, by:"Kettlebell Kings"}, bridge:{v:"4Q2nSzh1N9M", s:0, e:15, by:"Kyles Vanlife"},
+  tricep:{v:"PuzW73rVWkw", s:0, e:11, by:"Atomic Athlete"}, oneswing:{v:"8UHn_KNfvr4", s:0, e:15, by:"Think Fit"},
+  suitcase:{v:"_fMsHZf8RlY", s:0, e:15, by:"Adriell Mayes"}, splitsq:{v:"tN8m2nd76a8", s:0, e:12, by:"E3 Rehab"},
+  pushpress:{v:"k4q6HkT99iA", s:0, e:20, by:"NASM"}, kneelpress:{v:"OdSulau7apU", s:0, e:15, by:"Seattle Golf Fitness"},
+  hornrow:{v:"mG8UOxszXQ8", s:0, e:16, by:"Peter Forneck"}, skull:{v:"wxpVbsS6AY0", s:0, e:19, by:"SomethingRXD"},
+  hammer:{v:"V7lPFOEKyxs", s:0, e:11, by:"Facet Seven Fitness"}, frontraise:{v:"jBMdboDdRrI", s:0, e:20, by:"Pat Damiano"},
+  plank:{v:"3QZlgJ40LfU", s:0, e:20, by:"Hospital for Special Surgery"}, slbridge:{v:"V1NKta2znwU", s:0, e:15, by:"Girls Gone Strong"},
+  climber:{v:"ruQ4ZwncXBg", s:0, e:20, by:"U.S. Forces Fitness"}, kneepush:{v:"CbjT4e_BgAs", s:0, e:15, by:"Sami Leigh Fitness"},
+  superman:{v:"KTWWh3GsyYw", s:0, e:15, by:"Trainer Nate"}, birddog:{v:"_1j_HWknGLg", s:0, e:15, by:"AARP Answers"},
+  bwsplit:{v:"hXpGSa5HYqY", s:0, e:20, by:"Atomic Athlete"}, bwsldl:{v:"JQZqPsmeesc", s:0, e:20, by:"ConstantlyVariedFitness"},
+  crunch:{v:"Dbr2J9375oo", s:0, e:15, by:"Shanna Burks"}, hinge:{v:"nczH_7m1TnI", s:0, e:20, by:"CrossFit CDA"},
+  armswing:{v:"eG0kbjDAM68", s:0, e:15, by:"JZ Fitness"}, march:{v:"-aQbL65YHR0", s:0, e:8, by:"OriGym"},
+  bwlunge:{v:"xrPteyQLGAo", s:0, e:15, by:"PureGym"}, bwbridge:{v:"9L0JW2GDXwE", s:0, e:15, by:"Ellie Leeds"},
+  pike:{v:"4Lod28Vu-T8", s:0, e:23, by:"24Life"}, hipstretch:{v:"ktgtEWGhFd8", s:0, e:20, by:"Gerardi Performance"},
+  fold:{v:"goN4rWbQUn4", s:0, e:20, by:"Group HIIT"}, quadstretch:{v:"j-KreYRNOCc", s:0, e:25, by:"MGH Orthopaedics"},
+  kneehug:{v:"yVy4L0CGbyQ", s:0, e:10, by:"Cornerstone Physiotherapy"}, hamstretch:{v:"MiAXGtx_J0M", s:0, e:24, by:"Medibank"},
+  childpose:{v:"nMp3MlTz9fA", s:0, e:22, by:"Medibank"}, cobra:{v:"Nd3j6Avtv6Q", s:0, e:16, by:"Atomic Athlete"},
+  chest:{v:"bbhQYh-Dfm4", s:0, e:16, by:"Bob & Brad"}, tristretch:{v:"_IOHtPSYGbk", s:0, e:21, by:"React Physical Therapy"},
+  upperback:{v:"Cus9IRgnvcY", s:0, e:16, by:"Joanna Soh"}
 };
 function clipButton(host){
   const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-sm clipbtn'; b.hidden = true;
@@ -1169,7 +1190,7 @@ function syncClip(b, id){ b.hidden = !CLIPS[id]; b.onclick = () => openClip(id);
 function openClip(id){
   const c = CLIPS[id]; if (!c) return;
   $('clipName').textContent = EX[id].name;
-  const a = $('clipBy'); a.textContent = `Garrett Merrill · Day ${c.day}`; a.href = `https://www.youtube.com/shorts/${c.v}`;
+  const a = $('clipBy'); a.textContent = c.by || `Garrett Merrill · Day ${c.day}`; a.href = `https://www.youtube.com/watch?v=${c.v}&t=${c.s}s`;
   const play = () => { $('clipFrame').src = `https://www.youtube-nocookie.com/embed/${c.v}?start=${c.s}&end=${c.e}&autoplay=1&mute=1&playsinline=1&rel=0&controls=0`; };
   $('clipReplay').onclick = play; play();
   $('clipDlg').showModal();
