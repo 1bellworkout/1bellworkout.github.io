@@ -6,7 +6,7 @@ img{max-width:100%}
 
 /* Layout: app shell — sticky header with tabs; Today = stage (mannequin) beside the session card; Schedule = calendar + week picker; Moves = card grid. Player is a full-screen overlay. */
 :root{
-  --bg:#E9EBE6; --surface:#F7F8F4; --ink:#1B2024; --muted:#5A636B; --line:#D2D6CF;
+  --video:#000; --bg:#E9EBE6; --surface:#F7F8F4; --ink:#1B2024; --muted:#5A636B; --line:#D2D6CF;
   --signal:#E7AE0C; --signal-ink:#1B2024; --link:#245A92; --done:#2F7D57;
   --wood:#C89865; --wood-far:#A67A4E; --joint:#7E5733; --iron:#2A2F35; --iron-hi:#5B636C;
   --stage:#DFE2DB; --floor:#B9BEB5;
@@ -16,12 +16,12 @@ img{max-width:100%}
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#14171A; --surface:#1C2024; --ink:#ECEDE7; --muted:#9BA3AA; --line:#2E343A;
+  --video:#000; --bg:#14171A; --surface:#1C2024; --ink:#ECEDE7; --muted:#9BA3AA; --line:#2E343A;
   --signal:#F0BD22; --signal-ink:#14171A; --link:#86B1E6; --done:#5CC08E;
   --wood:#D2A474; --wood-far:#946C45; --joint:#6E4B2B; --iron:#3B4249; --iron-hi:#7A838C;
   --stage:#20252A; --floor:#3A4148; --ph-warm:#F08A4B; --ph-main:#F0BD22; --ph-cool:#6FA8E8; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#14171A; --surface:#1C2024; --ink:#ECEDE7; --muted:#9BA3AA; --line:#2E343A;
+  --video:#000; --bg:#14171A; --surface:#1C2024; --ink:#ECEDE7; --muted:#9BA3AA; --line:#2E343A;
   --signal:#F0BD22; --signal-ink:#14171A; --link:#86B1E6; --done:#5CC08E;
   --wood:#D2A474; --wood-far:#946C45; --joint:#6E4B2B; --iron:#3B4249; --iron-hi:#7A838C;
   --stage:#20252A; --floor:#3A4148; --ph-warm:#F08A4B; --ph-main:#F0BD22; --ph-cool:#6FA8E8; color-scheme:dark}
@@ -212,17 +212,18 @@ canvas.drag{cursor:grabbing}
 .coach .btn-go{margin-top:4px}
 .coachdlg{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);padding:16px;width:min(420px,calc(100% - 32px));margin:auto auto 16px}
 .coachdlg::backdrop{background:rgb(0 0 0 / .25)}
-.clipbtn{position:absolute;right:12px;top:40px;z-index:1;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;font-size:12.5px}
+/* Real-person clip laid over the 3D canvas (which stays in place, hidden, to keep the stage's size). */
+.clipbtn{position:absolute;right:12px;top:40px;z-index:3;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;font-size:12.5px}
 .clipbtn[hidden]{display:none}
 .clipbtn svg{width:12px;height:12px;fill:currentColor}
-.clipdlg{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);padding:14px;width:min(380px,calc(100% - 32px))}
-.clipdlg::backdrop{background:rgb(0 0 0 / .55)}
-.clipdlg form{display:grid;gap:10px}
-.clip-h{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.clip-h b{display:block;font-family:var(--f-display);font-size:22px;text-transform:uppercase}
-.clip-h a{font-size:12.5px;color:var(--muted)}
-.clip-v{aspect-ratio:9/16;margin:0 auto;width:min(100%, calc(66vh * 9 / 16));border-radius:10px;overflow:hidden;background:var(--stage)}
-.clip-v iframe{width:100%;height:100%;border:0;display:block}
+.clipbox{position:absolute;inset:0;z-index:1;background:var(--video)}
+.clipbox[hidden]{display:none}
+.clipbox iframe{width:100%;height:100%;border:0;display:block;pointer-events:none}
+.clip-by{position:absolute;left:10px;bottom:10px;font-size:11.5px;color:var(--muted);background:var(--surface);padding:3px 8px;border-radius:6px}
+#heroStage .clipbox{top:48px}
+.vid canvas{visibility:hidden}
+.vid .vctl{display:none}
+.p-phase,.p-side{z-index:2}
 .coach .chips button{display:inline-flex;align-items:center;gap:7px}
 .coach .chips i{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid var(--line)}
 .swatches{display:flex;gap:8px;align-items:center;flex-wrap:wrap}

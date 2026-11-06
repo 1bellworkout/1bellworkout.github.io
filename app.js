@@ -910,7 +910,8 @@ const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return nu
 const lsSet = (k,v) => { try { localStorage.setItem(k, v); } catch(e){} };
 const lsDel = k => { try { localStorage.removeItem(k); } catch(e){} };
 const parse = s => { try { return JSON.parse(s); } catch(e){ return null; } };
-function cleanCoach(c){ return {style: (c && STYLES[c.style]) ? c.style : 'athlete', skin: (c && SKINS.includes(c.skin)) ? c.skin : SKINS[2]}; }
+// mode: 'video' (real person, the default) or '3d'.
+function cleanCoach(c){ return {style: (c && STYLES[c.style]) ? c.style : 'athlete', skin: (c && SKINS.includes(c.skin)) ? c.skin : SKINS[2], mode: c && c.mode === '3d' ? '3d' : 'video'}; }
 function cleanState(d){
   d = d || {};
   return {
@@ -1138,7 +1139,7 @@ function nextPlannedDate(from){ for (let i=0;i<14;i++){ const d = new Date(from)
 /* ============ Real-person clips ============ */
 // YouTube clips of a real person doing a move: v = video id, s/e = start/end second, and either
 // day = Garrett Merrill's Day number or by = the channel's name.
-// Played in an embed (youtube-nocookie) inside #clipDlg; moves without a clip just don't show the button.
+// Played in a youtube-nocookie embed laid over the 3D coach on the Today stage and in the player.
 // Times come from his captions, so a clip can start a second or two early or late.
 const CLIPS = {
   swing:{v:"pXIjQ9lj_vU", s:16, e:23, day:10}, deadlift:{v:"eniDxYMJ8BY", s:14, e:23, day:14},
@@ -1181,22 +1182,43 @@ const CLIPS = {
   chest:{v:"bbhQYh-Dfm4", s:0, e:16, by:"Bob & Brad"}, tristretch:{v:"_IOHtPSYGbk", s:0, e:21, by:"React Physical Therapy"},
   upperback:{v:"Cus9IRgnvcY", s:0, e:16, by:"Joanna Soh"}
 };
-function clipButton(host){
-  const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-sm clipbtn'; b.hidden = true;
-  b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Real person';
-  host.appendChild(b); return b;
+const CLIP_HOSTS = [];
+// Adds a clip box over a stage's 3D canvas, plus a button that flips between the real person and the 3D coach.
+function clipBox(host){
+  const box = document.createElement('div'); box.className = 'clipbox'; box.hidden = true;
+  box.innerHTML = '<iframe title="Video of the move" allow="autoplay; encrypted-media" tabindex="-1"></iframe><a class="clip-by" target="_blank" rel="noopener"></a>';
+  const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'btn-sm clipbtn';
+  host.append(box, btn);
+  const o = {host, box, btn, frame: box.querySelector('iframe'), by: box.querySelector('a'), id: null, src: ''};
+  btn.onclick = () => { state.coach.mode = state.coach.mode === '3d' ? 'video' : '3d'; save(); CLIP_HOSTS.forEach(h => h.id && showClip(h, h.id)); };
+  // Ask the player for status updates, so the loop below can see when the clip ends.
+  o.frame.addEventListener('load', () => { if (o.src) o.frame.contentWindow.postMessage(JSON.stringify({event:'listening', id:CLIP_HOSTS.length, channel:'widget'}), '*'); });
+  CLIP_HOSTS.push(o); return o;
 }
-function syncClip(b, id){ b.hidden = !CLIPS[id]; b.onclick = () => openClip(id); }
-function openClip(id){
-  const c = CLIPS[id]; if (!c) return;
-  $('clipName').textContent = EX[id].name;
-  const a = $('clipBy'); a.textContent = c.by || `Garrett Merrill · Day ${c.day}`; a.href = `https://www.youtube.com/watch?v=${c.v}&t=${c.s}s`;
-  const play = () => { $('clipFrame').src = `https://www.youtube-nocookie.com/embed/${c.v}?start=${c.s}&end=${c.e}&autoplay=1&mute=1&playsinline=1&rel=0&controls=0`; };
-  $('clipReplay').onclick = play; play();
-  $('clipDlg').showModal();
+// The real person is the default; the 3D coach shows if you chose it, when offline, or for a move without a clip.
+function showClip(o, id){
+  o.id = id; const c = CLIPS[id]; const can = !!c && navigator.onLine; const vid = can && state.coach.mode !== '3d';
+  o.btn.hidden = !can;
+  o.btn.innerHTML = vid ? '3D coach' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Real person';
+  o.host.classList.toggle('vid', vid); o.box.hidden = !vid;
+  if (!vid){ stopClip(o); return; }
+  o.by.textContent = c.by || `Garrett Merrill · Day ${c.day}`; o.by.href = `https://www.youtube.com/watch?v=${c.v}&t=${c.s}s`;
+  const src = `https://www.youtube-nocookie.com/embed/${c.v}?start=${c.s}&end=${c.e}&autoplay=1&mute=1&playsinline=1&rel=0&controls=0&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
+  if (src !== o.src){ o.src = src; o.frame.src = src; }
 }
-// Closing blanks the frame so the video stops.
-function closeClip(){ $('clipFrame').src = 'about:blank'; }
+function stopClip(o){ if (o.src){ o.src = ''; o.frame.src = 'about:blank'; } }
+// Loop each clip: when it reaches its end second (or stops), jump back to the start.
+window.addEventListener('message', e => {
+  const o = CLIP_HOSTS.find(h => h.frame.contentWindow === e.source); if (!o || !o.src) return;
+  let d; try { d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; } catch(x){ return; }
+  const i = d && d.info, c = CLIPS[o.id]; if (!i || !c) return;
+  if (i.playerState === 0 || (typeof i.currentTime === 'number' && i.currentTime >= c.e)){
+    const cmd = (func, args) => o.frame.contentWindow.postMessage(JSON.stringify({event:'command', func, args: args || []}), '*');
+    cmd('seekTo', [c.s, true]); cmd('playVideo');
+  }
+});
+window.addEventListener('online', () => CLIP_HOSTS.forEach(h => h.id && showClip(h, h.id)));
+window.addEventListener('offline', () => CLIP_HOSTS.forEach(h => h.id && showClip(h, h.id)));
 
 /* ============ Today view ============ */
 let chosen = null, chosenR = null, dur = state.dur, preview = null;
@@ -1204,10 +1226,10 @@ let chosen = null, chosenR = null, dur = state.dur, preview = null;
 function plan(){ const w = chosen || nextWorkout(); const ri = chosenR ?? routineIndex(w); return {w, ri, R: w.routines[ri]}; }
 const $ = id => document.getElementById(id);
 const hero = makeView($('heroStage'), {interactive:true, label:'3D coach demonstrating the selected move'});
-const heroClip = clipButton($('heroStage'));
+const heroClip = clipBox($('heroStage'));
 const minis = [];
 function setPreview(id){
-  preview = id; hero.set(EX[id]); syncClip(heroClip, id);
+  preview = id; hero.set(EX[id]); if (!P) showClip(heroClip, id);
   $('heroName').textContent = EX[id].name; $('heroTag').textContent = EX[id].tag;
   document.querySelectorAll('#sessMoves button').forEach(b => b.setAttribute('aria-current', b.dataset.ex === id ? 'true':'false'));
 }
@@ -1438,12 +1460,10 @@ if (hero.bar){
   hero.bar.querySelector('.hint').replaceWith(cb);
 }
 $('coachDlg').addEventListener('click', e => { if (e.target === $('coachDlg')) $('coachDlg').close(); });
-$('clipDlg').addEventListener('click', e => { if (e.target === $('clipDlg')) $('clipDlg').close(); });
-$('clipDlg').addEventListener('close', closeClip);
 
 /* ============ Player ============ */
 const pm = makeView($('pStage'), {interactive:true, label:'3D coach demonstrating the current move'});
-const pClip = clipButton($('pStage'));
+const pClip = clipBox($('pStage'));
 let P = null, audio = null, wake = null;
 const CIRC = 351.86;
 function beep(freq=880, ms=120, vol=.18){
@@ -1462,7 +1482,7 @@ function startWorkout(){
   P = {w, ri, dur, segs, i:0, el:0, paused:false, last:performance.now(), beeped:{}, done:0};
   try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume && audio.resume(); } catch(e){}
   try { navigator.wakeLock && navigator.wakeLock.request('screen').then(l => wake = l).catch(()=>{}); } catch(e){}
-  $('player').hidden = false; $('pIn').hidden = false; $('pDone').hidden = true;
+  $('player').hidden = false; $('pIn').hidden = false; $('pDone').hidden = true; stopClip(heroClip);
   document.body.style.overflow = 'hidden';
   $('pTitle').innerHTML = ''; const b = document.createElement('b'); b.textContent = `Workout ${w.id} · ${w.name}`; $('pTitle').appendChild(b);
   $('pTitle').append(isAmrap(dur) ? ' · AMRAP' : ` · ${dur} min`);
@@ -1510,7 +1530,7 @@ function renderProgress(){
    your own pace with Done (Back goes one move back). Rounds are counted and logged. */
 function amrapShow(){
   const s = P.segs[P.i], A = P.am, m = s.moves[A.k], ex = EX[m];
-  pm.set(ex, 1); syncClip(pClip, m);
+  pm.set(ex, 1); showClip(pClip, m);
   $('pPhase').textContent = 'AMRAP · your pace'; $('pPhase').className = 'p-phase';
   $('pName').textContent = ex.name;
   $('pRound').textContent = `Round ${A.round} · ${s.reps[A.k]}`;
@@ -1536,7 +1556,7 @@ function enterSeg(i){
   $('pSkip').textContent = s.kind === 'amrap' ? 'Done ›' : 'Skip ›';
   $('pSkip').classList.toggle('pp', s.kind === 'amrap');
   const isRest = isBreak(s), isSwitch = s.kind === 'switch';
-  pm.set(ex, isRest ? 0.6 : 1); syncClip(pClip, s.ex);
+  pm.set(ex, isRest ? 0.6 : 1); showClip(pClip, s.ex);
   $('pPhase').textContent = isSwitch ? 'Switch · next up' : isRest ? 'Rest · next up' : s.kind === 'warm' ? 'Warm-up' : s.kind === 'cool' ? 'Cool-down' : 'Work';
   $('pPhase').className = 'p-phase' + (isRest ? ' rest' : '');
   $('pName').textContent = ex.name;
@@ -1582,7 +1602,7 @@ function finish(complete){
   const worked = P.done + (!isBreak(P.segs[P.i]) ? Math.min(P.el, P.segs[P.i].sec) : 0);
   const frac = worked / P.segs.filter(s=>!isBreak(s)).reduce((a,s)=>a+s.sec,0);
   const minutes = Math.round(totalSec(P.segs.slice(0, P.i+1))/60) || 1;
-  $('pIn').hidden = true; $('pDone').hidden = false;
+  $('pIn').hidden = true; $('pDone').hidden = false; stopClip(pClip);
   try { wake && wake.release(); } catch(e){} wake = null;
   if (complete || frac >= 0.5){
     state.log = state.log.filter(l => l.d !== tk);
@@ -1613,7 +1633,7 @@ function finish(complete){
 function nextPlannedLine(){ const t = today(); t.setDate(t.getDate()+1); const d = nextPlannedDate(t); const n = nextWorkout();
   const nm = `${n.name}: ${n.routines[routineIndex(n)].name}`;
   return d ? `Next up: Workout ${n.id} (${nm}) on ${DOW[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}.` : `Next up: Workout ${n.id} (${nm}).`; }
-function closePlayer(){ $('player').hidden = true; document.body.style.overflow = ''; try{ speechSynthesis.cancel(); }catch(e){} P = null; renderAll(); }
+function closePlayer(){ $('player').hidden = true; document.body.style.overflow = ''; try{ speechSynthesis.cancel(); }catch(e){} stopClip(pClip); P = null; renderAll(); }
 $('startBtn').onclick = startWorkout;
 $('pPause').onclick = () => { if (!P) return; P.paused = !P.paused; $('pPause').textContent = P.paused ? 'Resume' : 'Pause'; if (P.paused) try{speechSynthesis.cancel()}catch(e){} };
 $('pSkip').onclick = () => { if (!P) return; const s = P.segs[P.i]; if (s.kind === 'amrap'){ amrapStep(1); return; } if (!isBreak(s)) P.done += Math.min(P.el, s.sec); if (P.i < P.segs.length-1) enterSeg(P.i+1); else finish(true); };
