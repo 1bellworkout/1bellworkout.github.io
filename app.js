@@ -1178,11 +1178,14 @@ function renderToday(){
   });
   const mv = R.moves.slice(0,F.n);
   if (!preview || !mv.includes(preview)) setPreview(mv[0]); else setPreview(preview);
+  // Equipment toggle at the top; the bodyweight day has its own routines, so the day list hides there.
+  $('eqBell').setAttribute('aria-pressed', String(!w.bw)); $('eqBody').setAttribute('aria-pressed', String(!!w.bw));
+  $('pickWBox').hidden = !!w.bw;
   const nxt = nextWorkout();
   const pk = $('pickW'); pk.textContent = '';
-  WORKOUTS.forEach(x => {
+  WORKOUTS.filter(x => !x.bw).forEach(x => {
     const b = document.createElement('button'); b.setAttribute('aria-pressed', String(x.id === w.id));
-    b.textContent = x.extra ? `${x.name} (no bell)` : `${x.id} · ${x.name}`;
+    b.textContent = x.extra ? x.name : `${x.id} · ${x.name}`;
     if (x.id === nxt.id){ const s = document.createElement('span'); s.className='up'; s.textContent='up next'; b.appendChild(s); }
     b.addEventListener('click', () => { chosen = (x.id === nxt.id) ? null : x; chosenR = null; preview = null; renderToday(); });
     pk.appendChild(b);
@@ -1206,6 +1209,8 @@ function renderToday(){
 $('d20').onclick = () => { dur = 20; renderToday(); };
 $('d30').onclick = () => { dur = 30; renderToday(); };
 $('dA').onclick = () => { dur = 'amrap'; renderToday(); };
+$('eqBody').onclick = () => { if (!plan().w.bw){ chosen = WORKOUTS.find(x => x.bw); chosenR = null; preview = null; renderToday(); } };
+$('eqBell').onclick = () => { if (plan().w.bw){ chosen = null; chosenR = null; preview = null; renderToday(); } };
 
 /* ============ Schedule view ============ */
 let calMonth = (() => { const t = today(); return new Date(t.getFullYear(), t.getMonth(), 1); })();
