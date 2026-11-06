@@ -848,12 +848,25 @@ function repTarget(R, m){
     || (ex.sided ? (ex.switchCue ? '10 each way' : '10 each side') : '10');
 }
 const stretchSec = id => EX[id].sided ? 40 : 30;
-// Which routine of a day comes next: the one after the last you did, else by count.
+// Your latest rating of a routine (log field f: 1 liked, -1 not for me), and how many times you've done it.
+function routineRating(w, j){ const r = state.log.filter(l => l.w === w.id && l.v === j && l.f).sort((a,b) => a.d < b.d ? -1 : 1).pop(); return r ? r.f : 0; }
+const routineCount = (w, j) => state.log.filter(l => l.w === w.id && l.v === j).length;
+const LIKE_W = {1:1.6, 0:1, '-1':0.5};
+// Which routine of a day comes next. Each routine scores (sessions since you last did it) × (1.6 liked, 0.5 not for me);
+// the highest wins, never the one you just did. With no ratings this is plain rotation; liked ones just come round sooner.
 function routineIndex(w){
+  const n = w.routines.length;
   const mine = state.log.filter(l => l.w === w.id).sort((a,b) => a.d < b.d ? -1 : 1);
   const last = mine[mine.length-1];
-  const i = last && Number.isInteger(last.v) ? last.v + 1 : mine.length;
-  return i % w.routines.length;
+  if (!last || !Number.isInteger(last.v)) return mine.length % n;
+  let best = -1, bestS = -1;
+  for (let k = 1; k <= n; k++){
+    const j = (last.v + k) % n; if (j === last.v && n > 1) continue;
+    let ago = mine.length + 1; for (let i = mine.length-1; i >= 0; i--) if (mine[i].v === j){ ago = mine.length - i; break; }
+    const s = ago * LIKE_W[routineRating(w, j)];
+    if (s > bestS){ best = j; bestS = s; }
+  }
+  return best;
 }
 // A routine can override the day's timing (format[dur]) — e.g. the halo complex's 10 sets.
 const fmt = (R, dur) => Object.assign({}, FORMAT[dur], R.format && R.format[dur]);
@@ -903,7 +916,7 @@ function cleanState(d){
   return {
     days: Array.isArray(d.days) ? d.days.filter(x => Number.isInteger(x) && x >= 0 && x < 7) : DEFAULT.days.slice(),
     dur: d.dur === 30 ? 30 : 20,
-    log: Array.isArray(d.log) ? d.log.filter(x => x && /^\d{4}-\d\d-\d\d$/.test(x.d) && WORKOUTS.some(w => w.id === x.w)).map(x => Object.assign({d:x.d, w:x.w, m:+x.m || 0}, Number.isInteger(x.v) && x.v >= 0 && x.v < 20 ? {v:x.v} : {}, Number.isInteger(x.r) && x.r >= 0 && x.r < 500 ? {r:x.r} : {})) : [],
+    log: Array.isArray(d.log) ? d.log.filter(x => x && /^\d{4}-\d\d-\d\d$/.test(x.d) && WORKOUTS.some(w => w.id === x.w)).map(x => Object.assign({d:x.d, w:x.w, m:+x.m || 0}, Number.isInteger(x.v) && x.v >= 0 && x.v < 20 ? {v:x.v} : {}, Number.isInteger(x.r) && x.r >= 0 && x.r < 500 ? {r:x.r} : {}, x.f === 1 || x.f === -1 ? {f:x.f} : {})) : [],
     coach: cleanCoach(d.coach)
   };
 }
@@ -1122,15 +1135,58 @@ function nextWorkout(){ const rot = state.log.filter(l => ROTATION.some(w => w.i
   return ROTATION[rot.length % ROTATION.length]; }
 function nextPlannedDate(from){ for (let i=0;i<14;i++){ const d = new Date(from); d.setDate(d.getDate()+i); if (state.days.includes(d.getDay()) && !logFor(ymd(d))) return d; } return null; }
 
+/* ============ Real-person clips ============ */
+// YouTube clips of a real person doing a move: v = video id, s/e = start/end second, day = Garrett Merrill's Day number.
+// Played in an embed (youtube-nocookie) inside #clipDlg; moves without a clip just don't show the button.
+// Times come from his captions, so a clip can start a second or two early or late.
+const CLIPS = {
+  swing:{v:"pXIjQ9lj_vU", s:16, e:23, day:10}, deadlift:{v:"eniDxYMJ8BY", s:14, e:23, day:14},
+  goblet:{v:"X_n3OY1cmNA", s:5, e:14, day:32}, lunge:{v:"ALwniVBpDus", s:32, e:41, day:18},
+  row:{v:"eniDxYMJ8BY", s:7, e:14, day:14}, press:{v:"bQvDttYmAiw", s:37, e:45, day:16},
+  thruster:{v:"EK-osxiN3s8", s:29, e:35, day:21}, highpull:{v:"wIaIk_1Rmco", s:43, e:51, day:28},
+  pushup:{v:"lScOJBAmJAg", s:25, e:32, day:6}, floorpress:{v:"NNuDgkMvCTE", s:7, e:17, day:30},
+  gfloorpress:{v:"uzh3jG3HhfA", s:24, e:31, day:35}, curl:{v:"uzh3jG3HhfA", s:38, e:45, day:35},
+  sldl:{v:"ALwniVBpDus", s:7, e:15, day:18}, clean:{v:"5ebeXRHsGmU", s:13, e:19, day:24},
+  cleanpress:{v:"pXIjQ9lj_vU", s:6, e:16, day:10}, kbgm:{v:"eniDxYMJ8BY", s:36, e:45, day:14},
+  racksquat:{v:"pXIjQ9lj_vU", s:30, e:38, day:10}, situp:{v:"X_n3OY1cmNA", s:33, e:38, day:32},
+  halo:{v:"vTB3hjRlYO8", s:24, e:35, day:11}, standpullover:{v:"c_WokPzdME8", s:36, e:44, day:17},
+  halothruster:{v:"xfCkTZn-Qw0", s:24, e:36, day:8}, squatthruster:{v:"ALwniVBpDus", s:15, e:26, day:18},
+  shoulderpullover:{v:"EK-osxiN3s8", s:35, e:47, day:21}, curlhalo:{v:"54dXzd8Jzn0", s:5, e:13, day:20},
+  hornlift:{v:"V6pGeVK_2bk", s:8, e:16, day:23}, ballisticrow:{v:"wIaIk_1Rmco", s:28, e:35, day:28},
+  renegade:{v:"pXIjQ9lj_vU", s:23, e:30, day:10}, liftoffpush:{v:"bQvDttYmAiw", s:22, e:32, day:16},
+  situppress:{v:"7viPOCC_ZYs", s:31, e:40, day:4}, deadbug:{v:"c_WokPzdME8", s:23, e:32, day:17},
+  legraise:{v:"uzh3jG3HhfA", s:29, e:38, day:35}, crabdip:{v:"IyZHpNwHzic", s:20, e:28, day:13},
+  calfraise:{v:"VAT4xoMfoJk", s:25, e:30, day:3}, aroundworld:{v:"p8lFKNZXEqQ", s:53, e:62, day:31},
+  throwover:{v:"4GQQaD3FUqA", s:28, e:35, day:27}, highpull1:{v:"c_WokPzdME8", s:8, e:16, day:17},
+  swingsquat:{v:"uzh3jG3HhfA", s:8, e:16, day:35}, bwsquat:{v:"VAT4xoMfoJk", s:29, e:40, day:3}
+};
+function clipButton(host){
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-sm clipbtn'; b.hidden = true;
+  b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Real person';
+  host.appendChild(b); return b;
+}
+function syncClip(b, id){ b.hidden = !CLIPS[id]; b.onclick = () => openClip(id); }
+function openClip(id){
+  const c = CLIPS[id]; if (!c) return;
+  $('clipName').textContent = EX[id].name;
+  const a = $('clipBy'); a.textContent = `Garrett Merrill · Day ${c.day}`; a.href = `https://www.youtube.com/shorts/${c.v}`;
+  const play = () => { $('clipFrame').src = `https://www.youtube-nocookie.com/embed/${c.v}?start=${c.s}&end=${c.e}&autoplay=1&mute=1&playsinline=1&rel=0&controls=0`; };
+  $('clipReplay').onclick = play; play();
+  $('clipDlg').showModal();
+}
+// Closing blanks the frame so the video stops.
+function closeClip(){ $('clipFrame').src = 'about:blank'; }
+
 /* ============ Today view ============ */
 let chosen = null, chosenR = null, dur = state.dur, preview = null;
 // The workout day and routine Start will run: your picks, else what's up next.
 function plan(){ const w = chosen || nextWorkout(); const ri = chosenR ?? routineIndex(w); return {w, ri, R: w.routines[ri]}; }
 const $ = id => document.getElementById(id);
 const hero = makeView($('heroStage'), {interactive:true, label:'3D coach demonstrating the selected move'});
+const heroClip = clipButton($('heroStage'));
 const minis = [];
 function setPreview(id){
-  preview = id; hero.set(EX[id]);
+  preview = id; hero.set(EX[id]); syncClip(heroClip, id);
   $('heroName').textContent = EX[id].name; $('heroTag').textContent = EX[id].tag;
   document.querySelectorAll('#sessMoves button').forEach(b => b.setAttribute('aria-current', b.dataset.ex === id ? 'true':'false'));
 }
@@ -1165,6 +1221,8 @@ function renderToday(){
     pr.appendChild(b);
   });
   $('routineLbl').textContent = `Routine ${ri+1} of ${w.routines.length}`;
+  const cnt = routineCount(w, ri), rt = routineRating(w, ri);
+  $('routineStats').textContent = (cnt ? `Done ${cnt} time${cnt > 1 ? 's' : ''}` : 'Not done yet') + (rt > 0 ? ' · you liked it' : rt < 0 ? ' · marked not for me' : '');
   const names = ids => ids.map(id => EX[id].name).join(', ');
   $('sessWarm').textContent = names(w.warm.slice(0, F.warmN));
   $('sessCool').textContent = names(w.cool.slice(0, F.coolN));
@@ -1251,7 +1309,7 @@ function renderSched(){
   if (!sorted.length){ const li = document.createElement('li'); li.innerHTML = '<span>No sessions yet. Finish a workout and it lands here automatically.</span>'; h.appendChild(li); }
   sorted.forEach(l => { const w = WORKOUTS.find(x=>x.id===l.w) || {name:'Workout'}; const [y,m,d] = l.d.split('-').map(Number); const dt = new Date(y,m-1,d);
     const li = document.createElement('li'); li.innerHTML = '<b></b><span></span>';
-    li.querySelector('b').textContent = `${l.w} · ${w.name}` + (w.routines && w.routines[l.v] ? ` · ${w.routines[l.v].name}` : ''); li.querySelector('span').textContent = `${DOW[dt.getDay()]} ${MON[m-1].slice(0,3)} ${d} · ${l.m} min` + (Number.isInteger(l.r) ? ` · ${l.r} rounds` : ''); h.appendChild(li); });
+    li.querySelector('b').textContent = `${l.w} · ${w.name}` + (w.routines && w.routines[l.v] ? ` · ${w.routines[l.v].name}` : ''); li.querySelector('span').textContent = `${DOW[dt.getDay()]} ${MON[m-1].slice(0,3)} ${d} · ${l.m} min` + (Number.isInteger(l.r) ? ` · ${l.r} rounds` : '') + (l.f > 0 ? ' · liked' : l.f < 0 ? ' · not for me' : ''); h.appendChild(li); });
   renderAcct();
 }
 $('calPrev').onclick = () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()-1, 1); renderSched(); };
@@ -1359,9 +1417,12 @@ if (hero.bar){
   hero.bar.querySelector('.hint').replaceWith(cb);
 }
 $('coachDlg').addEventListener('click', e => { if (e.target === $('coachDlg')) $('coachDlg').close(); });
+$('clipDlg').addEventListener('click', e => { if (e.target === $('clipDlg')) $('clipDlg').close(); });
+$('clipDlg').addEventListener('close', closeClip);
 
 /* ============ Player ============ */
 const pm = makeView($('pStage'), {interactive:true, label:'3D coach demonstrating the current move'});
+const pClip = clipButton($('pStage'));
 let P = null, audio = null, wake = null;
 const CIRC = 351.86;
 function beep(freq=880, ms=120, vol=.18){
@@ -1428,7 +1489,7 @@ function renderProgress(){
    your own pace with Done (Back goes one move back). Rounds are counted and logged. */
 function amrapShow(){
   const s = P.segs[P.i], A = P.am, m = s.moves[A.k], ex = EX[m];
-  pm.set(ex, 1);
+  pm.set(ex, 1); syncClip(pClip, m);
   $('pPhase').textContent = 'AMRAP · your pace'; $('pPhase').className = 'p-phase';
   $('pName').textContent = ex.name;
   $('pRound').textContent = `Round ${A.round} · ${s.reps[A.k]}`;
@@ -1454,7 +1515,7 @@ function enterSeg(i){
   $('pSkip').textContent = s.kind === 'amrap' ? 'Done ›' : 'Skip ›';
   $('pSkip').classList.toggle('pp', s.kind === 'amrap');
   const isRest = isBreak(s), isSwitch = s.kind === 'switch';
-  pm.set(ex, isRest ? 0.6 : 1);
+  pm.set(ex, isRest ? 0.6 : 1); syncClip(pClip, s.ex);
   $('pPhase').textContent = isSwitch ? 'Switch · next up' : isRest ? 'Rest · next up' : s.kind === 'warm' ? 'Warm-up' : s.kind === 'cool' ? 'Cool-down' : 'Work';
   $('pPhase').className = 'p-phase' + (isRest ? ' rest' : '');
   $('pName').textContent = ex.name;
@@ -1511,9 +1572,19 @@ function finish(complete){
     chosen = null; chosenR = null; save();
     $('fTitle').textContent = complete ? 'Nice work.' : 'Good session.';
     const rounds = res ? ` You did ${res.r} rounds${res.x ? ` and ${res.x} move${res.x > 1 ? 's' : ''}` : ''}.` : '';
-    $('fText').textContent = `Workout ${w.id} · ${w.name} (${w.routines[P.ri].name}) is logged for today.${rounds} ${nextPlannedLine()}`;
+    const text = () => `Workout ${w.id} · ${w.name} (${w.routines[entry.v].name}) is logged for today.${rounds} ${nextPlannedLine()}`;
+    $('fText').textContent = text();
+    // Rating: tap again to clear. It changes how often this routine comes up, so the next-up line refreshes.
+    $('fRate').hidden = false;
+    const mark = () => $('fRate').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.f === entry.f)));
+    $('fRate').querySelectorAll('button').forEach(b => b.onclick = () => {
+      if (entry.f === +b.dataset.f) delete entry.f; else entry.f = +b.dataset.f;
+      save(); mark(); $('fText').textContent = text();
+    });
+    mark();
     beep(1320,200); setTimeout(()=>beep(1760,300),220); say(complete ? 'Workout complete. Nice work.' : 'Session logged.');
   } else {
+    $('fRate').hidden = true;
     $('fTitle').textContent = 'Ended early.';
     $('fText').textContent = 'Less than half the session was done, so it was not logged. Start again any time.';
   }
