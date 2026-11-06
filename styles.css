@@ -64,6 +64,7 @@ main{padding-block:24px 64px}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .seg.equip{display:flex;margin:0 0 16px}
 .seg.equip button{flex:1}
+.pickw{margin:0 0 18px;padding:0 0 18px;border-bottom:1px solid var(--line)}
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .spec{font-size:13px;color:var(--muted)}
 .moves{list-style:none;padding:0;margin:16px 0;display:grid;gap:2px}

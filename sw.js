@@ -1,6 +1,6 @@
 // 1 Bell service worker: makes the app open offline once it has been loaded once.
 // Bump VERSION whenever you deploy changes so phones pick up the new files.
-const VERSION = 'v7';
+const VERSION = 'v8';
 const CACHE = '1bell-' + VERSION;
 const SHELL = [
   './', 'index.html', 'styles.css', 'app.js', 'config.js', 'manifest.webmanifest',
@@ -12,7 +12,8 @@ const SHELL = [
 const CDN = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => Promise.all(SHELL.map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
+  // cache:'reload' skips the browser's HTTP cache, so a new version never stores an older copy of a file.
+  e.waitUntil(caches.open(CACHE).then(c => Promise.all(SHELL.map(u => c.add(new Request(u, {cache: 'reload'})).catch(() => {})))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('1bell-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
@@ -32,7 +33,8 @@ self.addEventListener('fetch', e => {
   // Everything else: serve from cache right away, refresh the cache in the background.
   e.respondWith(caches.open(CACHE).then(async c => {
     const hit = await c.match(req, {ignoreSearch: same});
-    const net = fetch(req).then(r => { if (r.ok || r.type === 'opaque') c.put(req, r.clone()); return r; }).catch(() => hit);
+    // Our own files are checked with the server (cheap when unchanged), not taken from the HTTP cache.
+    const net = fetch(same ? new Request(req, {cache: 'no-cache'}) : req).then(r => { if (r.ok || r.type === 'opaque') c.put(req, r.clone()); return r; }).catch(() => hit);
     return hit || net;
   }));
 });
