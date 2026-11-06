@@ -70,11 +70,6 @@
         <div class="stage" id="heroStage">
           <div class="cap"><b id="heroName">Two-Hand Swing</b><span id="heroTag">Tap a move to preview</span></div>
         </div>
-        <div class="coach card" style="padding:14px 16px">
-          <div class="row" style="justify-content:space-between"><span class="eyebrow">Choose your coach</span><span class="note" id="coachNote"></span></div>
-          <div class="chips" id="coachChips"></div>
-          <div class="swatches" id="skinSw"></div>
-        </div>
       </div>
       <div class="card session">
         <div class="seg equip" role="group" aria-label="Equipment">
@@ -222,6 +217,15 @@
     </div>
   </div>
 </div>
+
+<dialog class="coachdlg" id="coachDlg" aria-labelledby="coachDlgTitle">
+  <form method="dialog" class="coach">
+    <div class="row" style="justify-content:space-between"><span class="eyebrow" id="coachDlgTitle">Choose your coach</span><span class="note" id="coachNote"></span></div>
+    <div class="chips" id="coachChips"></div>
+    <div class="swatches" id="skinSw"></div>
+    <button class="btn-go" type="submit">Done</button>
+  </form>
+</dialog>
 
 <aside class="install" id="installBar" hidden aria-label="Install 1 Bell">
   <img src="icons/icon-192.png" alt="" width="40" height="40">

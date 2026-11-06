@@ -28,7 +28,7 @@ This app was first built as a claude.ai artifact and then moved here as a plain 
      - `bell`: one of `hang | along | rack | hip | none`.
 
      Keyframes loop in order with cosine easing.
-  3. **3D coach**: Three.js r128 from cdnjs, UMD global `THREE`. `ZC` gives each move the sideways (z) positions of the elbows and hands, and marks the grip as `'two'` or `'one'`. `STYLES` / `styleRoles()` define the coach looks (athlete, wood mannequin, robot, crash dummy); `SKINS` holds the athlete's skin tones. A single shared `WebGLRenderer` draws every view: each `Coach3D` view renders into a viewport and copies the pixels to its own 2D canvas. This keeps the page to one WebGL context, even with 20 library cards. `makeView()` picks 3D, or falls back to the 2D `Mannequin`.
+  3. **3D coach**: Three.js r128 from cdnjs, UMD global `THREE`. `ZC` gives each move the sideways (z) positions of the elbows and hands, and marks the grip as `'two'` or `'one'`. `STYLES` / `styleRoles()` define the coach looks (athlete, wood mannequin, robot, crash dummy); `SKINS` holds the athlete's skin tones. The picker for these is the `#coachDlg` dialog, opened by the "Change coach" button that replaces the hero stage's "Drag to turn" hint (3D only). A single shared `WebGLRenderer` draws every view: each `Coach3D` view renders into a viewport and copies the pixels to its own 2D canvas. This keeps the page to one WebGL context, even with 20 library cards. `makeView()` picks 3D, or falls back to the 2D `Mannequin`.
   4. **Workouts / `FORMAT` / `buildSession()`**: days A–E. Each day has:
      - its own `warm` list (dynamic, bodyweight moves);
      - its own `cool` list (static stretches for the muscles that day trains);

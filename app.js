@@ -1343,15 +1343,22 @@ setTimeout(showInstall, 1500);
 
 function renderCoach(){
   const cc = $('coachChips'); cc.textContent = '';
-  for (const id in STYLES){ const b = document.createElement('button'); b.setAttribute('aria-pressed', String(state.coach.style === id));
+  for (const id in STYLES){ const b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-pressed', String(state.coach.style === id));
     const i = document.createElement('i'); i.style.background = id === 'athlete' ? state.coach.skin : STYLES[id].dot; b.appendChild(i); b.append(STYLES[id].label);
     b.onclick = () => { state.coach.style = id; save(); }; cc.appendChild(b); }
   const sw = $('skinSw'); sw.textContent = ''; sw.hidden = state.coach.style !== 'athlete';
-  SKINS.forEach((c,i) => { const b = document.createElement('button'); b.style.background = c; b.setAttribute('aria-label', 'Skin tone ' + (i+1)); b.setAttribute('aria-pressed', String(state.coach.skin === c));
+  SKINS.forEach((c,i) => { const b = document.createElement('button'); b.type = 'button'; b.style.background = c; b.setAttribute('aria-label', 'Skin tone ' + (i+1)); b.setAttribute('aria-pressed', String(state.coach.skin === c));
     b.onclick = () => { state.coach.skin = c; save(); }; sw.appendChild(b); });
   $('coachNote').textContent = GL_OK ? 'Drag the figure to turn it' : '';
 }
 function renderAll(){ renderToday(); renderSched(); renderCoach(); }
+// The coach picker lives in a dialog, opened from a button on the hero stage (3D only; the 2D fallback has one look).
+if (hero.bar){
+  const cb = document.createElement('button'); cb.type = 'button'; cb.className = 'btn-sm coachbtn'; cb.textContent = 'Change coach';
+  cb.onclick = () => $('coachDlg').showModal();
+  hero.bar.querySelector('.hint').replaceWith(cb);
+}
+$('coachDlg').addEventListener('click', e => { if (e.target === $('coachDlg')) $('coachDlg').close(); });
 
 /* ============ Player ============ */
 const pm = makeView($('pStage'), {interactive:true, label:'3D coach demonstrating the current move'});
