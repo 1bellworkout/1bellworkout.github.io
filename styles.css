@@ -137,8 +137,11 @@ main{padding-block:24px 64px}
 .mv .meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
 
 /* player */
-.player{position:fixed;inset:0;z-index:20;background:var(--bg);overflow:auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-.p-in{max-width:1080px;margin:0 auto;padding:14px 16px 24px;display:grid;gap:14px;min-height:100%;grid-template-rows:auto auto 1fr auto}
+.player{position:fixed;inset:0;z-index:20;background:var(--bg);overflow:auto}
+.p-in{max-width:1080px;margin:0 auto;padding:14px 16px 24px;display:grid;gap:14px;min-height:100%;grid-template-rows:auto 1fr auto}
+/* the top (title + progress) and the controls stay pinned while the middle scrolls */
+.p-head{position:sticky;top:0;z-index:5;display:grid;gap:14px;background:var(--bg);margin:-14px -16px 0;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 10px}
+#pDone{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 .p-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .p-top .eyebrow b{color:var(--ink)}
 .p-x{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font-weight:600;font-size:14px}
@@ -179,7 +182,7 @@ main{padding-block:24px 64px}
 .p-cues{margin:0;padding-left:18px;display:grid;gap:4px}
 .p-next{font-size:14px;color:var(--muted)}
 .p-next b{color:var(--ink)}
-.p-ctl{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:10px}
+.p-ctl{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:10px;position:sticky;bottom:0;z-index:5;background:var(--bg);margin:0 -16px -24px;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px))}
 .p-ctl button{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 10px;font-weight:700;font-size:15px}
 .p-ctl .pp{background:var(--ink);color:var(--bg);border-color:var(--ink);font-family:var(--f-display);font-size:24px;text-transform:uppercase;letter-spacing:.04em}
 .toggles{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}

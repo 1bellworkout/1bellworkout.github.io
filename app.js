@@ -791,14 +791,14 @@ const WORKOUTS = [
       // Rep-based complex: each set is ~10 halos each way, then ~10 pullovers.
       {name:'Halo Complex', note:'Inspired by Garrett Merrill: each set is 10 halos one way, 10 the other, then 10 pullovers.',
         moves:['halo','standpullover'], reps:{halo:'10 each way', standpullover:'10 reps'},
-        format:{20:{n:2, rounds:10, work:[40,30], rest:5, roundRest:20}, 30:{n:2, rounds:15, work:[40,30], rest:5, roundRest:20}}}]},
+        format:{20:{n:2, rounds:8, work:[40,30]}, 30:{n:2, rounds:13, work:[40,30]}}}]},
   // Not in the A–E rotation: pick it for an easier day or when the kettlebell stays home.
   {id:'F', name:'Bodyweight', extra:true, bw:true, focus:'No kettlebell needed: an easier day, or for when the bell stays home.',
     warm:['march','bwsquat','hinge','armswing','bwbridge'],
     cool:['fold','hipstretch','childpose','quadstretch'],
     routines:[
       {name:'Easy Day', moves:['bwsquat','kneepush','bwbridge','bwlunge','birddog','plank'],
-        format:{20:{work:30, rest:30}, 30:{work:35, rest:25}}},
+        format:{20:{work:35}, 30:{work:40}}},
       {name:'Lower Body', moves:['bwsquat','bwsplit','slbridge','bwsldl','superman','crunch']},
       {name:'Upper & Core', moves:['pushup','superman','pike','birddog','climber','plank']},
       {name:'Full Body', moves:['bwsquat','pushup','bwlunge','superman','climber','plank']}]},
@@ -829,13 +829,14 @@ const WORKOUTS = [
         amrap:{swingsquat:'10', ballisticrow:'10 each hand', gfloorpress:'10', legraise:'10', curl:'10 slow', aroundworld:'5 each way'}},
       {name:'Halo Complex', note:'10 halos one way, 10 the other, then 10 pullovers.',
         moves:['halo','standpullover'], reps:{halo:'10 each way', standpullover:'10 reps'},
-        format:{20:{n:2, rounds:10, work:[40,30], rest:5, roundRest:20}, 30:{n:2, rounds:15, work:[40,30], rest:5, roundRest:20}}}]}
+        format:{20:{n:2, rounds:8, work:[40,30]}, 30:{n:2, rounds:13, work:[40,30]}}}]}
 ];
 const ROTATION = WORKOUTS.filter(w => !w.extra);
 // warmN/coolN: how many warm-up moves / stretches; sw: seconds to change position between them.
+// rest: 10 s between moves in a round; roundRest: 30 s between rounds (time for a drink).
 const FORMAT = {
-  20:{warmN:4, warmSec:30, n:5, rounds:3, work:40, rest:20, roundRest:30, coolN:3, sw:5},
-  30:{warmN:5, warmSec:35, n:6, rounds:4, work:45, rest:15, roundRest:20, coolN:4, sw:5},
+  20:{warmN:4, warmSec:30, n:6, rounds:3, work:40, rest:10, roundRest:30, coolN:3, sw:5},
+  30:{warmN:5, warmSec:35, n:6, rounds:4, work:50, rest:10, roundRest:30, coolN:4, sw:5},
   // AMRAP: timed warm-up, then as many rounds as possible of the routine in amrapSec, then cool-down.
   amrap:{warmN:4, warmSec:30, coolN:3, sw:5, amrapSec:1200}
 };
@@ -868,7 +869,7 @@ function routineIndex(w){
   }
   return best;
 }
-// A routine can override the day's timing (format[dur]) — e.g. the halo complex's 10 sets.
+// A routine can override the day's timing (format[dur]) — e.g. the halo complex's sets.
 const fmt = (R, dur) => Object.assign({}, FORMAT[dur], R.format && R.format[dur]);
 function buildSession(w, dur, ri){
   const R = w.routines[ri], F = fmt(R, dur), segs = [];
