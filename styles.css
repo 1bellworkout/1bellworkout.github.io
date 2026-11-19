@@ -78,6 +78,10 @@ main{padding-block:24px 64px}
 .moves .tg{font-size:12px;color:var(--muted)}
 .btn-go{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:12px;background:var(--signal);color:var(--signal-ink);font-family:var(--f-display);font-size:26px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:12px 26px;width:100%}
 .btn-go:hover{filter:brightness(1.05)}
+/* Start workout stays pinned to the bottom of the Today tab; the page scrolls behind it */
+.startbar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--bg);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.startbar .btn-go{display:flex;max-width:520px;margin:0 auto}
+#v-today{padding-bottom:72px}
 .pick{display:flex;gap:6px;flex-wrap:wrap}
 .pick button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600}
 .pick button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
@@ -258,6 +262,7 @@ body.gate>.top,body.gate>main{display:none}
 .install-go{flex:none;background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .install-x{flex:none;border:0;background:none;font-size:22px;line-height:1;color:var(--muted);padding:4px 6px}
 .player:not([hidden])~.install{display:none!important}
+body:has(#v-today:not([hidden])) .install{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));z-index:40;background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:10px;font-size:14px;font-weight:600;max-width:calc(100% - 32px)}
 .btn-sm{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font-weight:600;font-size:14px;justify-self:start}
 [hidden]{display:none!important}
