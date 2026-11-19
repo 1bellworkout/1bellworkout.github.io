@@ -899,11 +899,38 @@ function buildSession(w, dur, ri){
   });
   return segs;
 }
+/* Strength test (every 4 weeks): max reps in 60 s for three moves, then a max plank hold.
+   Results go to state.tests as {d, sw, gs, pu, pl}; `max` caps what cleanState accepts. */
+const TESTS = [
+  {k:'sw', ex:'swing',  name:'Swings',        unit:'reps', sec:60,  max:300,  cue:'As many as you can in 60 seconds.'},
+  {k:'gs', ex:'goblet', name:'Goblet squats', unit:'reps', sec:60,  max:200,  cue:'As many as you can in 60 seconds.'},
+  {k:'pu', ex:'pushup', name:'Push-ups',      unit:'reps', sec:60,  max:200,  cue:'As many as you can in 60 seconds. Knees down if you need to, the same way each test.'},
+  {k:'pl', ex:'plank',  name:'Plank hold',    unit:'s',    sec:180, max:3600, hold:true, cue:'Hold as long as you can, then tap Stop.'}];
+const TEST_DAYS = 28;
+function buildTest(){
+  const F = FORMAT[20], warm = ['march','bwsquat','hinge','armswing'], cool = ['childpose','fold'], segs = [];
+  warm.forEach((m,i) => {
+    if (i) segs.push({kind:'switch', ph:'warm', ex:m, sec:F.sw, label:'Switch'});
+    segs.push({kind:'warm', ph:'warm', ex:m, sec:F.warmSec, label:`Warm-up ${i+1} of ${warm.length}`});
+  });
+  segs.push({kind:'rest', ph:'main', ex:TESTS[0].ex, sec:10, label:'Warm-up done · Grab your kettlebell'});
+  TESTS.forEach((t,i) => {
+    // A hold has no rep count to enter, so its Stop tap (or the cap) records the time instead.
+    segs.push({kind:'test', ph:'main', ex:t.ex, sec:t.sec, test:t.k, hold:!!t.hold, cue:t.cue, label:`Test ${i+1} of ${TESTS.length} · ${t.hold ? 'Max hold' : 'Max reps in 60 s'}`});
+    if (i < TESTS.length-1) segs.push({kind:'rest', ph:'main', ex:TESTS[i+1].ex, sec:60, rec:t.hold ? null : t.k, label:'Rest · Log your count'});
+  });
+  segs.push({kind:'rest', ph:'cool', ex:cool[0], sec:10, label:'Test done · Cool-down next'});
+  cool.forEach((m,i) => {
+    if (i) segs.push({kind:'switch', ph:'cool', ex:m, sec:F.sw, label:'Switch'});
+    segs.push({kind:'cool', ph:'cool', ex:m, sec:stretchSec(m), label:`Cool-down ${i+1} of ${cool.length}`});
+  });
+  return segs;
+}
 const isBreak = s => s.kind === 'rest' || s.kind === 'switch';
 const totalSec = segs => segs.reduce((a,s)=>a+s.sec,0);
 
 /* ============ State + storage ============ */
-const DEFAULT = {days:[1,3,5], dur:20, log:[], coach:{style:'athlete', skin:SKINS[2]}};
+const DEFAULT = {days:[1,3,5], dur:20, log:[], tests:[], body:[], coach:{style:'athlete', skin:SKINS[2]}};
 let state = JSON.parse(JSON.stringify(DEFAULT));
 let dbRef = null, storeMode = 'local';
 const LSK = 'iron-thirty-v1';
@@ -913,12 +940,17 @@ const lsDel = k => { try { localStorage.removeItem(k); } catch(e){} };
 const parse = s => { try { return JSON.parse(s); } catch(e){ return null; } };
 // mode: 'video' (real person, the default) or '3d'.
 function cleanCoach(c){ return {style: (c && STYLES[c.style]) ? c.style : 'athlete', skin: (c && SKINS.includes(c.skin)) ? c.skin : SKINS[2], mode: c && c.mode === '3d' ? '3d' : 'video'}; }
+const inRange = (v, lo, hi) => typeof v === 'number' && isFinite(v) && v >= lo && v <= hi;
+const isYmd = s => /^\d{4}-\d\d-\d\d$/.test(s);
 function cleanState(d){
   d = d || {};
   return {
     days: Array.isArray(d.days) ? d.days.filter(x => Number.isInteger(x) && x >= 0 && x < 7) : DEFAULT.days.slice(),
     dur: d.dur === 30 ? 30 : 20,
     log: Array.isArray(d.log) ? d.log.filter(x => x && /^\d{4}-\d\d-\d\d$/.test(x.d) && WORKOUTS.some(w => w.id === x.w)).map(x => Object.assign({d:x.d, w:x.w, m:+x.m || 0}, Number.isInteger(x.v) && x.v >= 0 && x.v < 20 ? {v:x.v} : {}, Number.isInteger(x.r) && x.r >= 0 && x.r < 500 ? {r:x.r} : {}, x.f === 1 || x.f === -1 ? {f:x.f} : {})) : [],
+    // Strength tests and weigh-ins (lb / inches); bad or out-of-range values are dropped.
+    tests: Array.isArray(d.tests) ? d.tests.filter(x => x && isYmd(x.d)).map(x => { const o = {d:x.d}; TESTS.forEach(t => { if (Number.isInteger(x[t.k]) && x[t.k] >= 0 && x[t.k] <= t.max) o[t.k] = x[t.k]; }); return o; }).filter(o => Object.keys(o).length > 1) : [],
+    body: Array.isArray(d.body) ? d.body.filter(x => x && isYmd(x.d)).map(x => Object.assign({d:x.d}, inRange(x.wt, 50, 700) ? {wt:+x.wt} : {}, inRange(x.ws, 15, 80) ? {ws:+x.ws} : {})).filter(o => o.wt || o.ws) : [],
     coach: cleanCoach(d.coach)
   };
 }
@@ -1333,8 +1365,10 @@ function renderSched(){
     const isPlan = state.days.includes(dt.getDay());
     const b = document.createElement('button');
     b.className = (lg ? 'done' : isPlan && dt >= tdate ? 'plan' : '') + (k === tk ? ' is-today' : '');
-    b.innerHTML = `<span>${d}</span><small>${lg ? lg.w : ''}</small>`;
-    b.setAttribute('aria-label', `${MON[dt.getMonth()]} ${d}${lg ? ', done: workout '+lg.w : isPlan ? ', planned' : ''}`);
+    // A check-in (weigh-in or strength test) that day adds a small dot in the corner.
+    const ckd = state.body.some(x => x.d === k) || state.tests.some(x => x.d === k);
+    b.innerHTML = `<span>${d}</span><small>${lg ? lg.w : ''}</small>` + (ckd ? '<i class="ck"></i>' : '');
+    b.setAttribute('aria-label', `${MON[dt.getMonth()]} ${d}${lg ? ', done: workout '+lg.w : isPlan ? ', planned' : ''}${ckd ? ', check-in' : ''}`);
     if (dt <= tdate) b.onclick = () => {
       if (lg) state.log = state.log.filter(x => x.d !== k);
       else { const nw = nextWorkout(); state.log.push({d:k, w:nw.id, m:state.dur, v:routineIndex(nw)}); }
@@ -1349,17 +1383,106 @@ function renderSched(){
   $('stMonth').textContent = state.log.filter(l => l.d.startsWith(mk)).length;
   $('stMin').textContent = state.log.reduce((a,l)=>a+(+l.m||0),0);
   const h = $('hist'); h.textContent = '';
-  const sorted = state.log.slice().sort((a,b)=> a.d < b.d ? 1 : -1);
+  // Workouts, weigh-ins and strength tests, newest first.
+  const sorted = state.log.map(l => ({d:l.d, l})).concat(state.body.map(c => ({d:c.d, c})), state.tests.map(t => ({d:t.d, t}))).sort((a,b)=> a.d < b.d ? 1 : -1);
   if (!sorted.length){ const li = document.createElement('li'); li.innerHTML = '<span>No sessions yet. Finish a workout and it lands here automatically.</span>'; h.appendChild(li); }
-  sorted.forEach(l => { const w = WORKOUTS.find(x=>x.id===l.w) || {name:'Workout'}; const [y,m,d] = l.d.split('-').map(Number); const dt = new Date(y,m-1,d);
+  sorted.forEach(({d: dk, l, c, t: tst}) => { const [y,m,d] = dk.split('-').map(Number); const dt = new Date(y,m-1,d), day = `${DOW[dt.getDay()]} ${MON[m-1].slice(0,3)} ${d}`;
     const li = document.createElement('li'); li.innerHTML = '<b></b><span></span>';
-    li.querySelector('b').textContent = `${l.w} · ${w.name}` + (w.routines && w.routines[l.v] ? ` · ${w.routines[l.v].name}` : ''); li.querySelector('span').textContent = `${DOW[dt.getDay()]} ${MON[m-1].slice(0,3)} ${d} · ${l.m} min` + (Number.isInteger(l.r) ? ` · ${l.r} rounds` : '') + (l.f > 0 ? ' · liked' : l.f < 0 ? ' · not for me' : ''); h.appendChild(li); });
+    if (c){ li.querySelector('b').textContent = 'Weigh-in'; li.querySelector('span').textContent = [day, c.wt && `${c.wt} lb`, c.ws && `${c.ws} in waist`].filter(Boolean).join(' · '); }
+    else if (tst){ li.querySelector('b').textContent = 'Strength test'; li.querySelector('span').textContent = [day, ...TESTS.filter(x => tst[x.k] != null).map(x => `${x.name.split(' ')[0]} ${fmtVal(x.unit, tst[x.k])}`)].join(' · '); }
+    else { const w = WORKOUTS.find(x=>x.id===l.w) || {name:'Workout'};
+      li.querySelector('b').textContent = `${l.w} · ${w.name}` + (w.routines && w.routines[l.v] ? ` · ${w.routines[l.v].name}` : ''); li.querySelector('span').textContent = `${day} · ${l.m} min` + (Number.isInteger(l.r) ? ` · ${l.r} rounds` : '') + (l.f > 0 ? ' · liked' : l.f < 0 ? ' · not for me' : ''); }
+    h.appendChild(li); });
   renderAcct();
 }
 $('calPrev').onclick = () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()-1, 1); renderSched(); };
 $('calNext').onclick = () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()+1, 1); renderSched(); };
 $('dd20').onclick = () => { state.dur = 20; dur = 20; save(); };
 $('dd30').onclick = () => { state.dur = 30; dur = 30; save(); };
+
+/* ============ Check-ins + progress ============ */
+// The Check-in tab: weekly weigh-in (state.body) and the 4-weekly strength test (state.tests).
+// A dot on the tab shows when either is due.
+const parseYmd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const daysSince = s => Math.round((today() - parseYmd(s)) / 864e5);
+const shortDate = s => { const d = parseYmd(s); return `${MON[d.getMonth()].slice(0,3)} ${d.getDate()}`; };
+const fmtVal = (unit, v) => unit === 's' ? mmss(v) : unit === 'reps' ? String(v) : `${+v.toFixed(1)} ${unit}`;
+const lastOf = arr => arr.slice().sort((a,b) => a.d < b.d ? -1 : 1).pop();
+function renderCheck(){
+  const lb = lastOf(state.body), lt = lastOf(state.tests);
+  const bodyDue = !lb || daysSince(lb.d) >= 7, testDue = !lt || daysSince(lt.d) >= TEST_DAYS;
+  $('checkDot').hidden = !bodyDue && !testDue;
+  $('tab-check').setAttribute('aria-label', bodyDue || testDue ? 'Check-in (due)' : 'Check-in');
+  const nextBy = (d, n) => { const t = parseYmd(d); t.setDate(t.getDate() + n); return shortDate(ymd(t)); };
+  $('bodyDue').textContent = bodyDue ? 'Due this week' : `Done ${shortDate(lb.d)} · next ${nextBy(lb.d, 7)}`;
+  $('testDue').textContent = testDue ? (lt ? 'Due now' : 'Take your first one') : `Done ${shortDate(lt.d)} · next ${nextBy(lt.d, TEST_DAYS)}`;
+  $('bodyDue').classList.toggle('is-due', bodyDue); $('testDue').classList.toggle('is-due', testDue);
+  $('bodyNote').textContent = lb ? `Last check-in ${shortDate(lb.d)}: ${[lb.wt && lb.wt + ' lb', lb.ws && lb.ws + ' in waist'].filter(Boolean).join(', ')}. Fill in either or both.`
+    : 'Weigh yourself at the same time of day each week (morning is best). Waist is measured at the belly button. Fill in either or both.';
+  $('inWt').placeholder = lb && lb.wt ? 'last ' + lb.wt : ''; $('inWs').placeholder = lb && lb.ws ? 'last ' + lb.ws : '';
+  $('testNote').textContent = lt ? `Last time: ${TESTS.filter(x => lt[x.k] != null).map(x => `${x.name.toLowerCase()} ${fmtVal(x.unit, lt[x.k])}`).join(', ')}. Retest every 4 weeks to see how far you've come.`
+    : 'Four max efforts give you a starting point to compare against. Retest every 4 weeks.';
+}
+$('bodyForm').onsubmit = e => {
+  e.preventDefault();
+  const wt = parseFloat($('inWt').value), ws = parseFloat($('inWs').value), entry = {d: ymd(today())};
+  if (inRange(wt, 50, 700)) entry.wt = Math.round(wt*10)/10;
+  if (inRange(ws, 15, 80)) entry.ws = Math.round(ws*4)/4;
+  if (!entry.wt && !entry.ws){ $('bodyMsg').hidden = false; $('bodyMsg').textContent = 'Enter a weight (lb) or a waist size (in).'; return; }
+  state.body = state.body.filter(x => x.d !== entry.d).concat(entry);
+  $('inWt').value = ''; $('inWs').value = ''; $('bodyMsg').hidden = true;
+  save(); toast('Weigh-in saved. See it under Schedule → Progress.');
+};
+$('testStart').onclick = () => startTest();
+$('checkToSched').onclick = () => { show('sched'); window.scrollTo(0, 0); };
+$('gainsTest').onclick = () => startTest();
+$('gainsBody').onclick = () => { show('check'); window.scrollTo(0, 0); setTimeout(() => $('inWt').focus({preventScroll:true}), 200); };
+
+// Sparkline: x follows the real dates, y spans that metric's own range. Each point has a tooltip.
+const SVGNS = 'http://www.w3.org/2000/svg';
+function spark(pts, unit){
+  const W = 200, H = 44, p = 6, svg = document.createElementNS(SVGNS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('class', 'spark'); svg.setAttribute('aria-hidden', 'true');
+  const t0 = parseYmd(pts[0].d), span = Math.max(1, parseYmd(pts[pts.length-1].d) - t0);
+  const vs = pts.map(q => q.v); let lo = Math.min(...vs), hi = Math.max(...vs); if (hi === lo){ hi += 1; lo -= 1; }
+  const xy = q => [p + (parseYmd(q.d) - t0) / span * (W - 2*p), H - p - (q.v - lo) / (hi - lo) * (H - 2*p)];
+  const line = document.createElementNS(SVGNS, 'polyline');
+  line.setAttribute('points', pts.map(q => xy(q).map(n => n.toFixed(1)).join(',')).join(' ')); svg.appendChild(line);
+  pts.forEach((q, i) => {
+    const [x, y] = xy(q), last = i === pts.length-1;
+    const dot = document.createElementNS(SVGNS, 'circle'); dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', last ? 4.5 : 3); dot.setAttribute('class', last ? 'last' : 'pt');
+    const hit = document.createElementNS(SVGNS, 'circle'); hit.setAttribute('cx', x); hit.setAttribute('cy', y); hit.setAttribute('r', 10); hit.setAttribute('class', 'hit');
+    const tt = document.createElementNS(SVGNS, 'title'); tt.textContent = `${shortDate(q.d)}: ${fmtVal(unit, q.v)}`; hit.appendChild(tt);
+    svg.append(dot, hit);
+  });
+  return svg;
+}
+// "+8 since Sep 22", "−5.6 lb since Oct 1": the change from the first entry, in that metric's unit.
+const change = (unit, d) => { const a = Math.abs(d), s = d > 0 ? '+' : d < 0 ? '−' : '±';
+  return s + (unit === 's' ? `${a} s` : unit === 'reps' ? a : `${+a.toFixed(1)} ${unit}`); };
+function gainTile(label, unit, pts, sub){
+  const el = document.createElement('div'); el.className = 'gain';
+  const first = pts[0], last = pts[pts.length-1];
+  el.innerHTML = '<span class="eyebrow"></span><b class="num"></b><span class="chg"></span>';
+  el.querySelector('.eyebrow').textContent = label;
+  el.querySelector('b').textContent = fmtVal(unit, last.v);
+  el.querySelector('.chg').textContent = pts.length > 1 ? `${change(unit, last.v - first.v)} since ${shortDate(first.d)}` : (sub || `First one, ${shortDate(last.d)}`);
+  if (pts.length > 1) el.appendChild(spark(pts, unit));
+  return el;
+}
+function renderGains(){
+  const g = $('gains'); g.textContent = '';
+  const series = (arr, k) => arr.filter(x => x[k] != null).sort((a,b) => a.d < b.d ? -1 : 1).map(x => ({d:x.d, v:x[k]}));
+  TESTS.forEach(t => { const pts = series(state.tests, t.k); if (pts.length) g.appendChild(gainTile(t.unit === 's' ? t.name : `${t.name} in 60 s`, t.unit, pts)); });
+  [['wt', 'Body weight', 'lb'], ['ws', 'Waist', 'in']].forEach(([k, name, unit]) => { const pts = series(state.body, k); if (pts.length) g.appendChild(gainTile(name, unit, pts)); });
+  // AMRAP rounds per routine, from the workout log.
+  const am = {};
+  state.log.filter(l => Number.isInteger(l.r) && Number.isInteger(l.v)).forEach(l => (am[l.w + l.v] = am[l.w + l.v] || []).push(l));
+  Object.values(am).forEach(ls => { const l = ls[0], w = WORKOUTS.find(x => x.id === l.w), R = w && w.routines[l.v]; if (!R) return;
+    g.appendChild(gainTile(`AMRAP rounds · ${w.extra ? w.name : 'Workout ' + w.id} · ${R.name}`, 'reps', series(ls, 'r'))); });
+  $('gainsNote').textContent = g.children.length ? 'Each chart runs from your first entry to your latest. Retest every 4 weeks; weigh in weekly.'
+    : 'Nothing yet. Take the strength test and log a weigh-in to start tracking; AMRAP rounds show up here too.';
+}
 
 /* ============ Moves library ============ */
 const libIO = ('IntersectionObserver' in window) ? new IntersectionObserver(es => es.forEach(e => { if (e.target._view) e.target._view.visible = e.isIntersecting; }), {rootMargin:'100px'}) : null;
@@ -1387,12 +1510,12 @@ function renderLib(){
 let view = 'today';
 function show(v){ view = v;
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.v === v)));
-  $('v-today').hidden = v !== 'today'; $('v-sched').hidden = v !== 'sched'; $('v-moves').hidden = v !== 'moves';
+  ['today','check','sched','moves'].forEach(n => $('v-' + n).hidden = v !== n);
   if (v === 'moves') renderLib();
   try { localStorage.setItem(LSK+'-tab', v); } catch(e){}
 }
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => show(b.dataset.v));
-if (['sched','moves'].includes(location.hash.slice(1))) show(location.hash.slice(1));
+if (['check','sched','moves'].includes(location.hash.slice(1))) show(location.hash.slice(1));
 
 /* ============ Invite + install ============ */
 // Invite uses the phone's own share sheet (Messages, WhatsApp, email...), so contacts and phone
@@ -1453,7 +1576,7 @@ function renderCoach(){
     b.onclick = () => { state.coach.skin = c; save(); }; sw.appendChild(b); });
   $('coachNote').textContent = GL_OK ? 'Drag the figure to turn it' : '';
 }
-function renderAll(){ renderToday(); renderSched(); renderCoach(); }
+function renderAll(){ renderToday(); renderSched(); renderCoach(); renderCheck(); renderGains(); }
 // The coach picker lives in a dialog, opened from a button on the hero stage (3D only; the 2D fallback has one look).
 if (hero.bar){
   const cb = document.createElement('button'); cb.type = 'button'; cb.className = 'btn-sm coachbtn'; cb.textContent = 'Change coach';
@@ -1479,15 +1602,19 @@ function say(txt){
 }
 function startWorkout(){
   const {w, ri} = plan();
-  const segs = buildSession(w, dur, ri);
-  P = {w, ri, dur, segs, i:0, el:0, paused:false, last:performance.now(), beeped:{}, done:0};
+  openPlayer({w, ri, dur, segs: buildSession(w, dur, ri)}, `Workout ${w.id} · ${w.name}`, isAmrap(dur) ? ' · AMRAP' : ` · ${dur} min`);
+}
+// The strength test runs in the same player; P.res collects the counts as they're entered.
+function startTest(){ openPlayer({test:true, res:{}, segs: buildTest()}, 'Strength test', ` · ${TESTS.length} moves`); }
+function openPlayer(p, title, sub){
+  P = Object.assign({i:0, el:0, paused:false, last:performance.now(), beeped:{}, done:0}, p);
   try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume && audio.resume(); } catch(e){}
   try { navigator.wakeLock && navigator.wakeLock.request('screen').then(l => wake = l).catch(()=>{}); } catch(e){}
   $('player').hidden = false; $('pIn').hidden = false; $('pDone').hidden = true; stopClip(heroClip);
-  document.body.style.overflow = 'hidden';
-  $('pTitle').innerHTML = ''; const b = document.createElement('b'); b.textContent = `Workout ${w.id} · ${w.name}`; $('pTitle').appendChild(b);
-  $('pTitle').append(isAmrap(dur) ? ' · AMRAP' : ` · ${dur} min`);
-  buildProgress(segs);
+  document.body.style.overflow = 'hidden'; $('pPause').textContent = 'Pause';
+  $('pTitle').innerHTML = ''; const b = document.createElement('b'); b.textContent = title; $('pTitle').appendChild(b);
+  $('pTitle').append(sub);
+  buildProgress(P.segs);
   enterSeg(0);
 }
 /* Progress bar: one group per phase (warm-up / main set / cool-down), each with an icon and
@@ -1552,13 +1679,14 @@ const amrapRounds = () => P.am ? {r: P.am.round - 1, x: P.am.k} : null;
 function enterSeg(i){
   const prev = P.segs[P.i];
   if (prev && prev.kind === 'amrap' && i > P.i){ P.result = amrapRounds(); }
+  if (prev && prev.hold && i > P.i && P.el >= 3) P.res[prev.test] = Math.round(Math.min(P.el, prev.sec));
   P.i = i; P.el = 0; P.beeped = {};
   const s = P.segs[i]; const ex = EX[s.ex];
-  $('pSkip').textContent = s.kind === 'amrap' ? 'Done ›' : 'Skip ›';
-  $('pSkip').classList.toggle('pp', s.kind === 'amrap');
+  $('pSkip').textContent = s.kind === 'amrap' ? 'Done ›' : s.hold ? 'Stop ›' : 'Skip ›';
+  $('pSkip').classList.toggle('pp', s.kind === 'amrap' || !!s.hold);
   const isRest = isBreak(s), isSwitch = s.kind === 'switch';
   pm.set(ex, isRest ? 0.6 : 1); showClip(pClip, s.ex);
-  $('pPhase').textContent = isSwitch ? 'Switch · next up' : isRest ? 'Rest · next up' : s.kind === 'warm' ? 'Warm-up' : s.kind === 'cool' ? 'Cool-down' : 'Work';
+  $('pPhase').textContent = isSwitch ? 'Switch · next up' : isRest ? 'Rest · next up' : s.kind === 'warm' ? 'Warm-up' : s.kind === 'cool' ? 'Cool-down' : s.kind === 'test' ? 'Test' : 'Work';
   $('pPhase').className = 'p-phase' + (isRest ? ' rest' : '');
   $('pName').textContent = ex.name;
   $('pRound').textContent = s.label;
@@ -1566,7 +1694,9 @@ function enterSeg(i){
   const nx = P.segs.slice(i+1).find(x => !isBreak(x));
   $('pNext').innerHTML = '';
   if (isSwitch){ $('pNext').append('Get into position.'); }
+  else if (s.rec){ $('pNext').append(recField(s.rec)); }
   else if (isRest){ $('pNext').append('Get set. Starts when the timer hits zero.'); }
+  else if (s.kind === 'test'){ $('pNext').append(s.cue); }
   else if (nx){ $('pNext').append('Next: '); const b = document.createElement('b'); b.textContent = EX[nx.ex].name; $('pNext').appendChild(b); }
   else $('pNext').append('Last one!');
   $('pSide').hidden = true;
@@ -1578,8 +1708,21 @@ function enterSeg(i){
   P.leftShown = -1; renderProgress();
   if (s.kind === 'amrap'){ P.am = P.am || {k:0, round:1}; beep(1320, 220, .22); amrapShow(); return; }
   if (prev && prev.kind === 'amrap' && P.result){ say(`Time! ${P.result.r} rounds${P.result.x ? ' and ' + P.result.x + ' moves' : ''}.`); return; }
-  if (isSwitch) say(`Next, ${ex.name}.`); else if (isRest) say(`Rest. Next, ${ex.name}.`); else say(ex.name + (ex.sided ? `. ${ex.switchCue || 'Switch sides'} halfway.` : ''));
+  if (s.rec) say(`Time! Enter your ${testOf(s.rec).name.toLowerCase()}. Next, ${ex.name}.`);
+  else if (isSwitch) say(`Next, ${ex.name}.`); else if (isRest) say(`Rest. Next, ${ex.name}.`);
+  else if (s.kind === 'test') say(`${ex.name}. ${s.cue}`);
+  else say(ex.name + (ex.sided ? `. ${ex.switchCue || 'Switch sides'} halfway.` : ''));
   if (!isRest) beep(1320, 220, .22);
+}
+const testOf = k => TESTS.find(t => t.k === k);
+// During the rest after a rep test: a box for the count, kept in P.res (and editable again at the end).
+function recField(k){
+  const t = testOf(k), l = document.createElement('label'); l.className = 'fld p-rec';
+  l.append(`${t.name} done`);
+  const inp = document.createElement('input'); inp.type = 'number'; inp.inputMode = 'numeric'; inp.min = 0; inp.max = t.max;
+  if (P.res[k] != null) inp.value = P.res[k];
+  inp.oninput = () => { const v = parseInt(inp.value, 10); if (Number.isInteger(v) && v >= 0 && v <= t.max) P.res[k] = v; else delete P.res[k]; };
+  l.appendChild(inp); return l;
 }
 function tickPlayer(now){
   if (!P || $('player').hidden || !$('pDone').hidden) return;
@@ -1588,7 +1731,7 @@ function tickPlayer(now){
   if (!P.paused) P.el += dt;
   const rem = Math.max(0, s.sec - P.el);
   const secs = Math.ceil(rem);
-  $('pTime').textContent = s.kind === 'amrap' ? mmss(secs) : secs;
+  $('pTime').textContent = s.kind === 'amrap' ? mmss(secs) : s.hold ? mmss(Math.floor(P.el)) : secs;
   $('pRing').setAttribute('stroke-dashoffset', (CIRC * (P.el / s.sec)).toFixed(1));
   renderProgress();
   if (!P.paused){
@@ -1605,6 +1748,8 @@ function finish(complete){
   const minutes = Math.round(totalSec(P.segs.slice(0, P.i+1))/60) || 1;
   $('pIn').hidden = true; $('pDone').hidden = false; stopClip(pClip);
   try { wake && wake.release(); } catch(e){} wake = null;
+  $('fTest').hidden = true;
+  if (P.test) return finishTest(complete);
   if (complete || frac >= 0.5){
     state.log = state.log.filter(l => l.d !== tk);
     const res = P.result || amrapRounds();
@@ -1631,6 +1776,30 @@ function finish(complete){
     $('fText').textContent = 'Less than half the session was done, so it was not logged. Start again any time.';
   }
 }
+// Test results: confirm or fix the counts, then save. One test per day; saving again replaces it.
+function finishTest(complete){
+  const s = P.segs[P.i];
+  if (s.hold && P.res[s.test] == null && P.el >= 3) P.res[s.test] = Math.round(Math.min(P.el, s.sec));
+  $('fRate').hidden = true; $('fTest').hidden = false; $('fTestMsg').textContent = '';
+  $('fTitle').textContent = complete ? 'Test done.' : 'Test ended.';
+  $('fText').textContent = 'Check your numbers, then save them. Leave a box empty for a move you skipped.';
+  TESTS.forEach(t => $('ft-' + t.k).value = P.res[t.k] ?? '');
+  if (complete){ beep(1320,200); setTimeout(()=>beep(1760,300),220); say('Test complete. Enter your numbers.'); }
+}
+$('fTestGrid').append(...TESTS.map(t => { const l = document.createElement('label'); l.className = 'fld';
+  l.append(`${t.name} · ${t.unit === 's' ? 'seconds' : t.unit}`);
+  const inp = document.createElement('input'); inp.id = 'ft-' + t.k; inp.type = 'number'; inp.inputMode = 'numeric'; inp.min = 0; inp.max = t.max;
+  l.appendChild(inp); return l; }));
+$('fTest').onsubmit = e => {
+  e.preventDefault();
+  const tk = ymd(today()), entry = {d:tk};
+  TESTS.forEach(t => { const v = parseInt($('ft-' + t.k).value, 10); if (Number.isInteger(v) && v >= 0 && v <= t.max) entry[t.k] = v; });
+  if (Object.keys(entry).length < 2){ $('fTestMsg').textContent = 'Enter at least one number.'; return; }
+  const prev = state.tests.filter(x => x.d < tk).sort((a,b) => a.d < b.d ? -1 : 1).pop();
+  state.tests = state.tests.filter(x => x.d !== tk).concat(entry); save();
+  const vs = TESTS.filter(t => entry[t.k] != null && prev && prev[t.k] != null).map(t => `${t.name} ${fmtVal(t.unit, prev[t.k])} → ${fmtVal(t.unit, entry[t.k])}`);
+  $('fTestMsg').textContent = 'Saved. ' + (vs.length ? `Since ${shortDate(prev.d)}: ${vs.join(' · ')}.` : 'This is your starting point; the next test is in 4 weeks.');
+};
 function nextPlannedLine(){ const t = today(); t.setDate(t.getDate()+1); const d = nextPlannedDate(t); const n = nextWorkout();
   const nm = `${n.name}: ${n.routines[routineIndex(n)].name}`;
   return d ? `Next up: Workout ${n.id} (${nm}) on ${DOW[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}.` : `Next up: Workout ${n.id} (${nm}).`; }
@@ -1641,7 +1810,7 @@ $('pSkip').onclick = () => { if (!P) return; const s = P.segs[P.i]; if (s.kind =
 $('pPrev').onclick = () => { if (!P) return; if (P.segs[P.i].kind === 'amrap'){ if (P.am.k > 0 || P.am.round > 1) amrapStep(-1); else if (P.el <= 3) enterSeg(P.i-1); return; } if (P.el > 3 || P.i === 0) enterSeg(P.i); else enterSeg(P.i-1); };
 $('pEnd').onclick = () => { if (!P) return; if ($('pEnd').dataset.arm === '1'){ $('pEnd').dataset.arm = ''; $('pEnd').textContent = 'End workout'; finish(false); } else { $('pEnd').dataset.arm = '1'; $('pEnd').textContent = 'Tap again to end'; setTimeout(()=>{ $('pEnd').dataset.arm=''; $('pEnd').textContent='End workout'; }, 3000); } };
 $('fClose').onclick = closePlayer;
-document.addEventListener('keydown', e => { if (!P || $('player').hidden) return; if (e.code === 'Space'){ e.preventDefault(); $('pPause').click(); } });
+document.addEventListener('keydown', e => { if (!P || $('player').hidden || e.target.closest('input')) return; if (e.code === 'Space'){ e.preventDefault(); $('pPause').click(); } });
 
 /* ============ Animation loop ============ */
 let libFrame = 0, lastFloor = 0;

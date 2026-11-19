@@ -12,7 +12,7 @@ This app was first built as a claude.ai artifact and then moved here as a plain 
 
 ## Files
 
-- `index.html`: the markup. It holds the tabs (Today / Schedule / Moves) and the full-screen workout player overlay.
+- `index.html`: the markup. It holds the tabs (Today / Check-in / Schedule / Moves) and the full-screen workout player overlay.
 - `styles.css`: all styling. Colors are CSS custom properties on `:root`. Dark mode redefines them under `prefers-color-scheme: dark` and under `[data-theme="dark"]`.
 - `config.js`: Supabase URL + anon key (`window.ONEBELL_CONFIG`). While it holds the `YOUR_...` placeholders, the app runs without accounts.
 - `supabase/schema.sql`: the `plans` table (one row per user, `data` jsonb) plus row-level security policies.
@@ -35,7 +35,7 @@ This app was first built as a claude.ai artifact and then moved here as a plain 
      - 4 `routines` of 6 moves each, with the day's staple lifts in every routine.
 
      Log entries store the routine as `v`. The finish screen asks "Did you like this workout?" (`#fRate`) and stores `f` (1 liked, -1 not for me) on that log entry. `routineIndex()` scores each of the day's routines by sessions since it was last done × 1.6 if liked / 0.5 if not, never repeating the last one; with no ratings that's plain rotation. The A–E day rotation itself isn't affected, so muscle groups stay balanced. `FORMAT` sets the 20- and 30-minute formats: how many warm-ups, moves and stretches; work/rest times (every workout rests 10 s between moves and 30 s between rounds; the 20-min format uses all 6 moves × 3 rounds at 40 s, the 30-min 6 × 4 at 50 s); and `sw`, the 5 s "switch" break between warm-up moves and between stretches. Stretches last 30 s, or 40 s if one-sided (20 s per side). Segments carry `ph` (warm/main/cool) for the progress bar; `isBreak()` covers both rests and switches.
-  5. **State + storage**: `state = {days, dur, log:[{d:'YYYY-MM-DD', w:'A', m:20}], coach:{style, skin}}`. Storage has three modes:
+  5. **State + storage**: `state = {days, dur, log:[{d:'YYYY-MM-DD', w:'A', m:20}], tests:[{d, sw, gs, pu, pl}], body:[{d, wt, ws}], coach:{style, skin}}`. Storage has three modes:
      - **Accounts** (`CLOUD`, when `config.js` is filled in): a sign-in gate (`#auth`, `body.gate`) using Supabase email + password: sign in, create an account, and "Forgot password?". A reset link fires `PASSWORD_RECOVERY`, which shows the `#authReset` form. Each user's state is cached in localStorage under `iron-thirty-v1:<uid>`. A `-dirty` flag marks changes the server hasn't confirmed yet. `push()` upserts the user's row in `plans`. `pull()` sends dirty changes, or otherwise takes the server copy; it runs on sign-in, on the `online` event and when the tab becomes visible. On a user's first sign-in, pre-accounts data under `iron-thirty-v1` is adopted and then removed. Sign-out removes that user's cache.
      - **claude.ai**: syncs to the artifact database through `window.claude.use('db')`.
      - **Local only**: localStorage key `iron-thirty-v1` (the original working name, kept so saved data survives the rename).
@@ -60,10 +60,16 @@ This app was first built as a claude.ai artifact and then moved here as a plain 
 - Day G (Garrett Merrill) is `extra` and holds his routines, taken from his YouTube Shorts transcripts (Days 1–35). Each routine's `note` cites the source day and any moves swapped for ones the rig can show.
 - Day F (Bodyweight) is `extra`: it's chosen with the Kettlebell / No bell toggle (`#eqBell` / `#eqBody`) at the top of the Today card, not from the day list below it (which hides while it's chosen). It sits outside the A–E `ROTATION`, and `bw` changes the "Grab your kettlebell" break to "Get ready". A routine can override timing with `format[dur]` (for example `work` as one value per move) and show rep targets with `reps`; the Halo Complex does both. A move with `switchCue` (the halo's "Switch direction") uses that wording at the halfway point instead of "Switch sides".
 - Real-person clips: `CLIPS` maps every move id to a YouTube clip `{v, s, e}` (video id, start/end second) plus `day` (Garrett Merrill's Day, used where he does the move) or `by` (another channel's name, for the rest). New moves need a clip too. The real person is the default view: `clipBox()` lays a youtube-nocookie embed over the 3D canvas on the Today stage and in the player, and `showClip()` loads the current move's clip (muted, looping between `s` and `e` via the embed's postMessage API). Its button switches to the 3D coach and back, saved as `state.coach.mode` ('video' | '3d'). The 3D coach shows when that's chosen, when offline, or for a move without a clip. The Moves library cards stay 3D. The times come from his captions. To find more, load a Short in the YouTube player with captions on and capture the timedtext response.
+- Check-ins + progress (section "Check-ins + progress", between Schedule view and Moves library):
+  - **Strength test** (`TESTS`, `buildTest()`, `startTest()`): warm-up, then max swings / goblet squats / push-ups in 60 s each and a max plank hold (Skip reads "Stop"; holds under 3 s don't count). The 60 s rest after each rep test (`rec`) shows a box for the count (`recField()`, kept in `P.res`). `finishTest()` shows `#fTest` to fix and save the numbers into `state.tests` (one per day). It doesn't log a workout. Suggested every `TEST_DAYS` (28).
+  - **Weekly weigh-in**: weight (lb) and waist (in) into `state.body`.
+  - Both live on their own **Check-in** tab (`#v-check`, between Today and Schedule). A dot on the tab (`#checkDot`) shows when the weigh-in (7 days) or the test (`TEST_DAYS`) is due; each card's eyebrow says "Due" or "Done … · next …".
+  - Check-ins also show on the Schedule calendar (a dot in the day's corner) and in History, mixed in with workouts.
+  - `#gainsCard` at the top of the Schedule tab: a tile per test, weight, waist and AMRAP routine (from `log[].r`), each with the change since the first entry and a date-scaled sparkline (`spark()`).
+  - The player is shared through `openPlayer()`; `P.test` marks a test run.
 - To check poses quickly, draw each key with `new Mannequin(el).draw(normalize(key))`.
 
 ## Ideas / next steps
 
 - Offer a log export/import as JSON. History saved in the claude.ai version does not carry over to accounts.
 - Add Google sign-in (`signInWithOAuth`) as an alternative to email codes.
-- Add progression tracking (e.g. reps per interval).

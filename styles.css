@@ -268,3 +268,38 @@ body:has(#v-today:not([hidden])) .install{bottom:calc(84px + env(safe-area-inset
 [hidden]{display:none!important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (prefers-reduced-motion:reduce){.ring .fg{transition:none}}
+/* check-ins (Today) + progress (Schedule) */
+.checkin{display:grid;gap:12px}
+.checkin h2{font-size:26px}
+.bodyform{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.fld{display:grid;gap:4px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.fld input{font:inherit;font-size:17px;font-weight:600;letter-spacing:0;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;width:7.5em}
+.fld input:focus-visible{outline:3px solid var(--signal);outline-offset:1px}
+.btn-sm.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bodyform .btn-sm{padding:10px 14px}
+.p-rec input{width:6em}
+.testform{display:grid;gap:12px;width:100%;max-width:520px}
+.tgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.tgrid .fld input{width:100%}
+.gains{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.gain{display:grid;gap:4px;grid-template-rows:auto auto auto 1fr;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.gain b{font-family:var(--f-display);font-size:32px;font-weight:800;line-height:1}
+.gain .chg{font-size:13px;color:var(--muted)}
+.spark{display:block;width:100%;height:44px;margin-top:4px;overflow:visible;align-self:end}
+.spark polyline{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.spark .pt{fill:var(--ink)}
+.spark .last{fill:var(--signal);stroke:var(--bg);stroke-width:2}
+.spark .hit{fill:transparent}
+/* Check-in tab */
+.tabs button{position:relative;white-space:nowrap}
+@media (max-width:520px){.tabs button{padding:6px 4px}}
+.tabs .due{position:absolute;top:4px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--signal)}
+.tabs .due[hidden]{display:none}
+.checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
+@media (max-width:820px){.checks{grid-template-columns:1fr}}
+.checkin .eyebrow{margin-bottom:6px}
+.checkin .eyebrow.is-due{color:var(--ink)}
+.checkin .eyebrow.is-due::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--signal);margin-right:6px;vertical-align:1px}
+.testlist{margin:0;padding-left:20px;display:grid;gap:4px}
+.cal .ck{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--signal)}
+.legend .ck-key{width:7px;height:7px;border-radius:50%;background:var(--signal)}
