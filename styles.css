@@ -304,3 +304,12 @@ body:has(#v-today:not([hidden])) .install{bottom:calc(84px + env(safe-area-inset
 .testlist{margin:0;padding-left:20px;display:grid;gap:4px}
 .cal .ck{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--signal)}
 .legend .ck-key{width:7px;height:7px;border-radius:50%;background:var(--signal)}
+/* past check-ins: tap a row to edit it */
+.hist li.editable{cursor:pointer;border-radius:6px}
+.hist li.editable:hover b{text-decoration:underline}
+.hist li.editable:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.hist li.editable span::after{content:" \203A";color:var(--muted)}
+.ckform{display:grid;gap:14px}
+.ckform .fld input[type=date]{width:auto}
+.ckform [hidden]{display:none}
+#ckPast .hist{max-height:none}

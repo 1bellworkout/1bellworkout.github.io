@@ -950,7 +950,8 @@ function cleanState(d){
     dur: d.dur === 30 ? 30 : 20,
     log: Array.isArray(d.log) ? d.log.filter(x => x && /^\d{4}-\d\d-\d\d$/.test(x.d) && WORKOUTS.some(w => w.id === x.w)).map(x => Object.assign({d:x.d, w:x.w, m:+x.m || 0}, Number.isInteger(x.v) && x.v >= 0 && x.v < 20 ? {v:x.v} : {}, Number.isInteger(x.r) && x.r >= 0 && x.r < 500 ? {r:x.r} : {}, x.f === 1 || x.f === -1 ? {f:x.f} : {})) : [],
     // Strength tests and weigh-ins (lb / inches); bad or out-of-range values are dropped.
-    tests: Array.isArray(d.tests) ? d.tests.filter(x => x && isYmd(x.d)).map(x => { const o = {d:x.d}; TESTS.forEach(t => { if (Number.isInteger(x[t.k]) && x[t.k] >= 0 && x[t.k] <= t.max){ o[t.k] = x[t.k]; if (t.bell && x.kb && inRange(x.kb[t.k], 1, 200)) (o.kb = o.kb || {})[t.k] = +x.kb[t.k]; } }); return o; }).filter(o => Object.keys(o).length > 1) : [],
+    // Each test has an id (several can share a day, e.g. a retest with a heavier bell); older ones get one from their date.
+    tests: Array.isArray(d.tests) ? d.tests.filter(x => x && isYmd(x.d)).map((x, i) => { const o = {d:x.d, id: typeof x.id === 'string' && /^[\w-]{1,24}$/.test(x.id) ? x.id : `${x.d}-${i}`}; TESTS.forEach(t => { if (Number.isInteger(x[t.k]) && x[t.k] >= 0 && x[t.k] <= t.max){ o[t.k] = x[t.k]; if (t.bell && x.kb && inRange(x.kb[t.k], 1, 200)) (o.kb = o.kb || {})[t.k] = +x.kb[t.k]; } }); return o; }).filter(o => TESTS.some(t => o[t.k] != null)) : [],
     body: Array.isArray(d.body) ? d.body.filter(x => x && isYmd(x.d)).map(x => Object.assign({d:x.d}, inRange(x.wt, 50, 700) ? {wt:+x.wt} : {}, inRange(x.ws, 15, 80) ? {ws:+x.ws} : {})).filter(o => o.wt || o.ws) : [],
     coach: cleanCoach(d.coach)
   };
@@ -1388,10 +1389,9 @@ function renderSched(){
   const sorted = state.log.map(l => ({d:l.d, l})).concat(state.body.map(c => ({d:c.d, c})), state.tests.map(t => ({d:t.d, t}))).sort((a,b)=> a.d < b.d ? 1 : -1);
   if (!sorted.length){ const li = document.createElement('li'); li.innerHTML = '<span>No sessions yet. Finish a workout and it lands here automatically.</span>'; h.appendChild(li); }
   sorted.forEach(({d: dk, l, c, t: tst}) => { const [y,m,d] = dk.split('-').map(Number); const dt = new Date(y,m-1,d), day = `${DOW[dt.getDay()]} ${MON[m-1].slice(0,3)} ${d}`;
+    if (c || tst){ h.appendChild(checkRow(c ? 'body' : 'test', c || tst)); return; }
     const li = document.createElement('li'); li.innerHTML = '<b></b><span></span>';
-    if (c){ li.querySelector('b').textContent = 'Weigh-in'; li.querySelector('span').textContent = [day, c.wt && `${c.wt} lb`, c.ws && `${c.ws} in waist`].filter(Boolean).join(' · '); }
-    else if (tst){ li.querySelector('b').textContent = 'Strength test'; li.querySelector('span').textContent = [day, ...TESTS.filter(x => tst[x.k] != null).map(x => `${x.name.split(' ')[0]} ${testVal(x, tst)}`)].join(' · '); }
-    else { const w = WORKOUTS.find(x=>x.id===l.w) || {name:'Workout'};
+    { const w = WORKOUTS.find(x=>x.id===l.w) || {name:'Workout'};
       li.querySelector('b').textContent = `${l.w} · ${w.name}` + (w.routines && w.routines[l.v] ? ` · ${w.routines[l.v].name}` : ''); li.querySelector('span').textContent = `${day} · ${l.m} min` + (Number.isInteger(l.r) ? ` · ${l.r} rounds` : '') + (l.f > 0 ? ' · liked' : l.f < 0 ? ' · not for me' : ''); }
     h.appendChild(li); });
   renderAcct();
@@ -1408,7 +1408,10 @@ const parseYmd = s => { const [y,m,d] = s.split('-').map(Number); return new Dat
 const daysSince = s => Math.round((today() - parseYmd(s)) / 864e5);
 const shortDate = s => { const d = parseYmd(s); return `${MON[d.getMonth()].slice(0,3)} ${d.getDate()}`; };
 const fmtVal = (unit, v) => unit === 's' ? mmss(v) : unit === 'reps' ? String(v) : `${+v.toFixed(1)} ${unit}`;
-const lastOf = arr => arr.slice().sort((a,b) => a.d < b.d ? -1 : 1).pop();
+// Oldest first; tests on the same day keep the order they were taken in (ids grow with time).
+const byDate = (a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : String(a.id || '') < String(b.id || '') ? -1 : 1;
+const lastOf = arr => arr.slice().sort(byDate).pop();
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 // A test result with its bell weight when there is one: "38 @ 30 lb", "1:15".
 const kbOf = (t, x) => t.bell && x.kb && x.kb[t.k];
 const testVal = (t, x) => fmtVal(t.unit, x[t.k]) + (kbOf(t, x) ? ` @ ${kbOf(t, x)} lb` : '');
@@ -1429,7 +1432,78 @@ function renderCheck(){
   $('inWt').placeholder = lb && lb.wt ? 'last ' + lb.wt : ''; $('inWs').placeholder = lb && lb.ws ? 'last ' + lb.ws : '';
   $('testNote').textContent = lt ? `Last time: ${TESTS.filter(x => lt[x.k] != null).map(x => `${x.name.toLowerCase()} ${testVal(x, lt)}`).join(', ')}. Retest every 4 weeks to see how far you've come.`
     : 'Four max efforts give you a starting point to compare against. Retest every 4 weeks.';
+  const ul = $('ckHist'); ul.textContent = '';
+  const all = state.body.map(x => ['body', x]).concat(state.tests.map(x => ['test', x])).sort((a, b) => -byDate(a[1], b[1]));
+  all.forEach(([k, x]) => ul.appendChild(checkRow(k, x)));
+  $('ckPast').hidden = !all.length;
 }
+// A History / Past check-ins row for a weigh-in or test; tapping it opens the editor.
+function checkRow(kind, x){
+  const li = document.createElement('li'); li.className = 'editable'; li.tabIndex = 0; li.setAttribute('role', 'button');
+  li.innerHTML = '<b></b><span></span>';
+  const dt = parseYmd(x.d), day = `${DOW[dt.getDay()]} ${MON[dt.getMonth()].slice(0,3)} ${dt.getDate()}`;
+  li.querySelector('b').textContent = kind === 'body' ? 'Weigh-in' : 'Strength test';
+  li.querySelector('span').textContent = kind === 'body' ? [day, x.wt && `${x.wt} lb`, x.ws && `${x.ws} in waist`].filter(Boolean).join(' · ')
+    : [day, ...TESTS.filter(t => x[t.k] != null).map(t => `${t.name.split(' ')[0]} ${testVal(t, x)}`)].join(' · ');
+  li.setAttribute('aria-label', `Edit ${li.querySelector('b').textContent.toLowerCase()}, ${li.querySelector('span').textContent}`);
+  li.onclick = () => openEdit(kind, x);
+  li.onkeydown = e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openEdit(kind, x); } };
+  return li;
+}
+
+/* Editing a past check-in (#ckDlg): change the date, numbers or bell weights, or delete it. */
+// Test fields: the count, plus the bell's weight beside it for the bell moves. Used here and on the results screen.
+function field(id, text, attrs){ const l = document.createElement('label'); l.className = 'fld'; l.append(text);
+  const inp = Object.assign(document.createElement('input'), {id, type:'number'}, attrs); l.appendChild(inp); return l; }
+function testRows(cp, bp){ return TESTS.map(t => { const row = document.createElement('div'); row.className = 'trow';
+  row.appendChild(field(cp + t.k, `${t.name} · ${t.unit === 's' ? 'seconds' : t.unit}`, {inputMode:'numeric', min:0, max:t.max}));
+  if (t.bell) row.appendChild(field(bp + t.k, 'Bell · lb', {inputMode:'decimal', min:1, max:200, step:'any'}));
+  return row; }); }
+// Reads those fields into a test entry; null when no count was entered.
+function readTest(cp, bp, d){
+  const entry = {d};
+  TESTS.forEach(t => { const v = parseInt($(cp + t.k).value, 10); if (!(Number.isInteger(v) && v >= 0 && v <= t.max)) return;
+    entry[t.k] = v;
+    const kb = t.bell ? parseFloat($(bp + t.k).value) : NaN; if (inRange(kb, 1, 200)) (entry.kb = entry.kb || {})[t.k] = Math.round(kb*10)/10; });
+  return TESTS.some(t => entry[t.k] != null) ? entry : null;
+}
+$('ckTest').append(...testRows('et-', 'eb-'));
+let editing = null;
+function openEdit(kind, x){
+  editing = {kind, x};
+  $('ckDlgTitle').textContent = kind === 'body' ? 'Edit weigh-in' : 'Edit strength test';
+  $('ckDate').value = x.d; $('ckDate').max = ymd(today());
+  $('ckTest').hidden = kind !== 'test'; $('ckBody').hidden = kind !== 'body';
+  if (kind === 'test') TESTS.forEach(t => { $('et-' + t.k).value = x[t.k] ?? ''; if (t.bell) $('eb-' + t.k).value = kbOf(t, x) || ''; });
+  else { $('ckWt').value = x.wt ?? ''; $('ckWs').value = x.ws ?? ''; }
+  $('ckMsg').textContent = ''; $('ckDel').dataset.arm = ''; $('ckDel').textContent = 'Delete';
+  $('ckDlg').showModal();
+}
+$('ckForm').onsubmit = e => {
+  e.preventDefault();
+  const {kind, x} = editing, d = $('ckDate').value;
+  if (!isYmd(d) || d > ymd(today())){ $('ckMsg').textContent = 'Pick a date that isn’t in the future.'; return; }
+  if (kind === 'test'){
+    const entry = readTest('et-', 'eb-', d); if (!entry){ $('ckMsg').textContent = 'Enter at least one number.'; return; }
+    entry.id = x.id; state.tests = state.tests.map(y => y === x ? entry : y);
+  } else {
+    const wt = parseFloat($('ckWt').value), ws = parseFloat($('ckWs').value), entry = {d};
+    if (inRange(wt, 50, 700)) entry.wt = Math.round(wt*10)/10;
+    if (inRange(ws, 15, 80)) entry.ws = Math.round(ws*4)/4;
+    if (!entry.wt && !entry.ws){ $('ckMsg').textContent = 'Enter a weight (lb) or a waist size (in).'; return; }
+    // One weigh-in per day: moving it onto a day that already has one replaces that one.
+    state.body = state.body.filter(y => y !== x && y.d !== d).concat(entry);
+  }
+  $('ckDlg').close(); save(); toast('Check-in updated.');
+};
+$('ckDel').onclick = () => {
+  if ($('ckDel').dataset.arm !== '1'){ $('ckDel').dataset.arm = '1'; $('ckDel').textContent = 'Tap again to delete'; return; }
+  const {kind, x} = editing;
+  if (kind === 'test') state.tests = state.tests.filter(y => y !== x); else state.body = state.body.filter(y => y !== x);
+  $('ckDlg').close(); save(); toast('Check-in deleted.');
+};
+$('ckCancel').onclick = () => $('ckDlg').close();
+$('ckDlg').addEventListener('click', e => { if (e.target === $('ckDlg')) $('ckDlg').close(); });
 $('bodyForm').onsubmit = e => {
   e.preventDefault();
   const wt = parseFloat($('inWt').value), ws = parseFloat($('inWs').value), entry = {d: ymd(today())};
@@ -1481,8 +1555,8 @@ function gainTile(label, unit, pts, sub){
 }
 function renderGains(){
   const g = $('gains'); g.textContent = '';
-  const series = (arr, k) => arr.filter(x => x[k] != null).sort((a,b) => a.d < b.d ? -1 : 1).map(x => ({d:x.d, v:x[k]}));
-  TESTS.forEach(t => { const pts = series(state.tests, t.k); pts.forEach(q => { const x = state.tests.find(y => y.d === q.d); if (kbOf(t, x)) q.kb = kbOf(t, x); }); if (pts.length) g.appendChild(gainTile(t.unit === 's' ? t.name : `${t.name} in 60 s`, t.unit, pts)); });
+  const series = (arr, k, t) => arr.filter(x => x[k] != null).sort(byDate).map(x => Object.assign({d:x.d, v:x[k]}, t && kbOf(t, x) ? {kb: kbOf(t, x)} : {}));
+  TESTS.forEach(t => { const pts = series(state.tests, t.k, t); if (pts.length) g.appendChild(gainTile(t.unit === 's' ? t.name : `${t.name} in 60 s`, t.unit, pts)); });
   [['wt', 'Body weight', 'lb'], ['ws', 'Waist', 'in']].forEach(([k, name, unit]) => { const pts = series(state.body, k); if (pts.length) g.appendChild(gainTile(name, unit, pts)); });
   // AMRAP rounds per routine, from the workout log.
   const am = {};
@@ -1795,24 +1869,18 @@ function finishTest(complete){
   TESTS.forEach(t => { $('ft-' + t.k).value = P.res[t.k] ?? ''; if (t.bell) $('fb-' + t.k).value = lastBell(t.k); });
   if (complete){ beep(1320,200); setTimeout(()=>beep(1760,300),220); say('Test complete. Enter your numbers.'); }
 }
-// One row per move: the count, plus the bell's weight beside it for the bell moves.
-const field = (id, text, attrs) => { const l = document.createElement('label'); l.className = 'fld'; l.append(text);
-  const inp = Object.assign(document.createElement('input'), {id, type:'number'}, attrs); l.appendChild(inp); return l; };
-$('fTestGrid').append(...TESTS.map(t => { const row = document.createElement('div'); row.className = 'trow';
-  row.appendChild(field('ft-' + t.k, `${t.name} · ${t.unit === 's' ? 'seconds' : t.unit}`, {inputMode:'numeric', min:0, max:t.max}));
-  if (t.bell) row.appendChild(field('fb-' + t.k, 'Bell · lb', {inputMode:'decimal', min:1, max:200, step:'any'}));
-  return row; }));
+$('fTestGrid').append(...testRows('ft-', 'fb-'));
+// Each test run is its own entry (P.testId), so a same-day retest with another bell doesn't replace the first;
+// saving again from the same results screen just updates it. It compares with the test before it.
 $('fTest').onsubmit = e => {
   e.preventDefault();
-  const tk = ymd(today()), entry = {d:tk};
-  TESTS.forEach(t => { const v = parseInt($('ft-' + t.k).value, 10); if (!(Number.isInteger(v) && v >= 0 && v <= t.max)) return;
-    entry[t.k] = v;
-    const kb = t.bell ? parseFloat($('fb-' + t.k).value) : NaN; if (inRange(kb, 1, 200)) (entry.kb = entry.kb || {})[t.k] = Math.round(kb*10)/10; });
-  if (!TESTS.some(t => entry[t.k] != null)){ $('fTestMsg').textContent = 'Enter at least one number.'; return; }
-  const prev = state.tests.filter(x => x.d < tk).sort((a,b) => a.d < b.d ? -1 : 1).pop();
-  state.tests = state.tests.filter(x => x.d !== tk).concat(entry); save();
+  const entry = readTest('ft-', 'fb-', ymd(today()));
+  if (!entry){ $('fTestMsg').textContent = 'Enter at least one number.'; return; }
+  entry.id = P.testId = P.testId || newId();
+  const prev = lastOf(state.tests.filter(x => x.id !== entry.id));
+  state.tests = state.tests.filter(x => x.id !== entry.id).concat(entry); save();
   const vs = TESTS.filter(t => entry[t.k] != null && prev && prev[t.k] != null).map(t => kbOf(t, prev) !== kbOf(t, entry) ? `${t.name} ${testVal(t, prev)} → ${testVal(t, entry)}` : `${t.name} ${fmtVal(t.unit, prev[t.k])} → ${testVal(t, entry)}`);
-  $('fTestMsg').textContent = 'Saved. ' + (vs.length ? `Since ${shortDate(prev.d)}: ${vs.join(' · ')}.` : 'This is your starting point; the next test is in 4 weeks.');
+  $('fTestMsg').textContent = 'Saved. ' + (vs.length ? `Since ${prev.d === entry.d ? 'your earlier test today' : shortDate(prev.d)}: ${vs.join(' · ')}.` : 'This is your starting point; the next test is in 4 weeks.');
 };
 function nextPlannedLine(){ const t = today(); t.setDate(t.getDate()+1); const d = nextPlannedDate(t); const n = nextWorkout();
   const nm = `${n.name}: ${n.routines[routineIndex(n)].name}`;

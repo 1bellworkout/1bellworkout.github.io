@@ -138,6 +138,10 @@
         <button class="btn-go" type="button" id="testStart">Start the test</button>
       </div>
     </div>
+    <div class="card stack" id="ckPast" hidden>
+      <div class="row" style="justify-content:space-between"><h2 style="font-size:24px">Past check-ins</h2><span class="note">Tap one to edit or delete it</span></div>
+      <ul class="hist" id="ckHist"></ul>
+    </div>
     <div class="row" style="justify-content:space-between">
       <p class="note" style="margin:0">Your check-ins show on the Schedule calendar, in History and in the Progress charts.</p>
       <button class="btn-sm" type="button" id="checkToSched">See your progress</button>
@@ -275,6 +279,20 @@
     </div>
   </div>
 </div>
+
+<dialog class="coachdlg" id="ckDlg" aria-labelledby="ckDlgTitle">
+  <form class="ckform" id="ckForm" novalidate>
+    <div class="row" style="justify-content:space-between"><h2 id="ckDlgTitle" style="font-size:24px">Edit check-in</h2><button type="button" class="btn-sm" id="ckCancel">Cancel</button></div>
+    <label class="fld">Date<input type="date" id="ckDate"></label>
+    <div class="tgrid" id="ckTest"></div>
+    <div class="bodyform" id="ckBody">
+      <label class="fld">Weight · lb<input id="ckWt" type="number" inputmode="decimal" step="0.1" min="50" max="700"></label>
+      <label class="fld">Waist · in<input id="ckWs" type="number" inputmode="decimal" step="0.25" min="15" max="80"></label>
+    </div>
+    <p class="note" id="ckMsg" style="margin:0"></p>
+    <div class="row" style="justify-content:space-between"><button class="btn-sm primary" type="submit">Save changes</button><button class="btn-sm" type="button" id="ckDel">Delete</button></div>
+  </form>
+</dialog>
 
 <dialog class="coachdlg" id="coachDlg" aria-labelledby="coachDlgTitle">
   <form method="dialog" class="coach">
