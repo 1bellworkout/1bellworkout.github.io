@@ -279,8 +279,9 @@ body:has(#v-today:not([hidden])) .install{bottom:calc(84px + env(safe-area-inset
 .bodyform .btn-sm{padding:10px 14px}
 .p-rec input{width:6em}
 .testform{display:grid;gap:12px;width:100%;max-width:520px}
-.tgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.tgrid .fld input{width:100%}
+.tgrid{display:grid;gap:12px}
+.trow{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:10px;align-items:end}
+.trow .fld input{width:100%}
 .gains{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
 .gain{display:grid;gap:4px;grid-template-rows:auto auto auto 1fr;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .gain b{font-family:var(--f-display);font-size:32px;font-weight:800;line-height:1}

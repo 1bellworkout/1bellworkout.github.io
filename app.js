@@ -900,10 +900,11 @@ function buildSession(w, dur, ri){
   return segs;
 }
 /* Strength test (every 4 weeks): max reps in 60 s for three moves, then a max plank hold.
-   Results go to state.tests as {d, sw, gs, pu, pl}; `max` caps what cleanState accepts. */
+   Results go to state.tests as {d, sw, gs, pu, pl, kb:{sw, gs}}; `max` caps what cleanState accepts.
+   `bell` moves also record the bell's weight in lb (kb), so a heavier bell later still compares fairly. */
 const TESTS = [
-  {k:'sw', ex:'swing',  name:'Swings',        unit:'reps', sec:60,  max:300,  cue:'As many as you can in 60 seconds.'},
-  {k:'gs', ex:'goblet', name:'Goblet squats', unit:'reps', sec:60,  max:200,  cue:'As many as you can in 60 seconds.'},
+  {k:'sw', ex:'swing',  name:'Swings',        unit:'reps', sec:60,  max:300,  bell:true, cue:'As many as you can in 60 seconds.'},
+  {k:'gs', ex:'goblet', name:'Goblet squats', unit:'reps', sec:60,  max:200,  bell:true, cue:'As many as you can in 60 seconds.'},
   {k:'pu', ex:'pushup', name:'Push-ups',      unit:'reps', sec:60,  max:200,  cue:'As many as you can in 60 seconds. Knees down if you need to, the same way each test.'},
   {k:'pl', ex:'plank',  name:'Plank hold',    unit:'s',    sec:180, max:3600, hold:true, cue:'Hold as long as you can, then tap Stop.'}];
 const TEST_DAYS = 28;
@@ -949,7 +950,7 @@ function cleanState(d){
     dur: d.dur === 30 ? 30 : 20,
     log: Array.isArray(d.log) ? d.log.filter(x => x && /^\d{4}-\d\d-\d\d$/.test(x.d) && WORKOUTS.some(w => w.id === x.w)).map(x => Object.assign({d:x.d, w:x.w, m:+x.m || 0}, Number.isInteger(x.v) && x.v >= 0 && x.v < 20 ? {v:x.v} : {}, Number.isInteger(x.r) && x.r >= 0 && x.r < 500 ? {r:x.r} : {}, x.f === 1 || x.f === -1 ? {f:x.f} : {})) : [],
     // Strength tests and weigh-ins (lb / inches); bad or out-of-range values are dropped.
-    tests: Array.isArray(d.tests) ? d.tests.filter(x => x && isYmd(x.d)).map(x => { const o = {d:x.d}; TESTS.forEach(t => { if (Number.isInteger(x[t.k]) && x[t.k] >= 0 && x[t.k] <= t.max) o[t.k] = x[t.k]; }); return o; }).filter(o => Object.keys(o).length > 1) : [],
+    tests: Array.isArray(d.tests) ? d.tests.filter(x => x && isYmd(x.d)).map(x => { const o = {d:x.d}; TESTS.forEach(t => { if (Number.isInteger(x[t.k]) && x[t.k] >= 0 && x[t.k] <= t.max){ o[t.k] = x[t.k]; if (t.bell && x.kb && inRange(x.kb[t.k], 1, 200)) (o.kb = o.kb || {})[t.k] = +x.kb[t.k]; } }); return o; }).filter(o => Object.keys(o).length > 1) : [],
     body: Array.isArray(d.body) ? d.body.filter(x => x && isYmd(x.d)).map(x => Object.assign({d:x.d}, inRange(x.wt, 50, 700) ? {wt:+x.wt} : {}, inRange(x.ws, 15, 80) ? {ws:+x.ws} : {})).filter(o => o.wt || o.ws) : [],
     coach: cleanCoach(d.coach)
   };
@@ -1389,7 +1390,7 @@ function renderSched(){
   sorted.forEach(({d: dk, l, c, t: tst}) => { const [y,m,d] = dk.split('-').map(Number); const dt = new Date(y,m-1,d), day = `${DOW[dt.getDay()]} ${MON[m-1].slice(0,3)} ${d}`;
     const li = document.createElement('li'); li.innerHTML = '<b></b><span></span>';
     if (c){ li.querySelector('b').textContent = 'Weigh-in'; li.querySelector('span').textContent = [day, c.wt && `${c.wt} lb`, c.ws && `${c.ws} in waist`].filter(Boolean).join(' · '); }
-    else if (tst){ li.querySelector('b').textContent = 'Strength test'; li.querySelector('span').textContent = [day, ...TESTS.filter(x => tst[x.k] != null).map(x => `${x.name.split(' ')[0]} ${fmtVal(x.unit, tst[x.k])}`)].join(' · '); }
+    else if (tst){ li.querySelector('b').textContent = 'Strength test'; li.querySelector('span').textContent = [day, ...TESTS.filter(x => tst[x.k] != null).map(x => `${x.name.split(' ')[0]} ${testVal(x, tst)}`)].join(' · '); }
     else { const w = WORKOUTS.find(x=>x.id===l.w) || {name:'Workout'};
       li.querySelector('b').textContent = `${l.w} · ${w.name}` + (w.routines && w.routines[l.v] ? ` · ${w.routines[l.v].name}` : ''); li.querySelector('span').textContent = `${day} · ${l.m} min` + (Number.isInteger(l.r) ? ` · ${l.r} rounds` : '') + (l.f > 0 ? ' · liked' : l.f < 0 ? ' · not for me' : ''); }
     h.appendChild(li); });
@@ -1408,6 +1409,12 @@ const daysSince = s => Math.round((today() - parseYmd(s)) / 864e5);
 const shortDate = s => { const d = parseYmd(s); return `${MON[d.getMonth()].slice(0,3)} ${d.getDate()}`; };
 const fmtVal = (unit, v) => unit === 's' ? mmss(v) : unit === 'reps' ? String(v) : `${+v.toFixed(1)} ${unit}`;
 const lastOf = arr => arr.slice().sort((a,b) => a.d < b.d ? -1 : 1).pop();
+// A test result with its bell weight when there is one: "38 @ 30 lb", "1:15".
+const kbOf = (t, x) => t.bell && x.kb && x.kb[t.k];
+const testVal = (t, x) => fmtVal(t.unit, x[t.k]) + (kbOf(t, x) ? ` @ ${kbOf(t, x)} lb` : '');
+// The bell to suggest: whatever this move was last tested with, else the app's 30 lb bell.
+const BELL_LB = 30;
+const lastBell = k => { const x = lastOf(state.tests.filter(x => x.kb && x.kb[k])); return x ? x.kb[k] : BELL_LB; };
 function renderCheck(){
   const lb = lastOf(state.body), lt = lastOf(state.tests);
   const bodyDue = !lb || daysSince(lb.d) >= 7, testDue = !lt || daysSince(lt.d) >= TEST_DAYS;
@@ -1420,7 +1427,7 @@ function renderCheck(){
   $('bodyNote').textContent = lb ? `Last check-in ${shortDate(lb.d)}: ${[lb.wt && lb.wt + ' lb', lb.ws && lb.ws + ' in waist'].filter(Boolean).join(', ')}. Fill in either or both.`
     : 'Weigh yourself at the same time of day each week (morning is best). Waist is measured at the belly button. Fill in either or both.';
   $('inWt').placeholder = lb && lb.wt ? 'last ' + lb.wt : ''; $('inWs').placeholder = lb && lb.ws ? 'last ' + lb.ws : '';
-  $('testNote').textContent = lt ? `Last time: ${TESTS.filter(x => lt[x.k] != null).map(x => `${x.name.toLowerCase()} ${fmtVal(x.unit, lt[x.k])}`).join(', ')}. Retest every 4 weeks to see how far you've come.`
+  $('testNote').textContent = lt ? `Last time: ${TESTS.filter(x => lt[x.k] != null).map(x => `${x.name.toLowerCase()} ${testVal(x, lt)}`).join(', ')}. Retest every 4 weeks to see how far you've come.`
     : 'Four max efforts give you a starting point to compare against. Retest every 4 weeks.';
 }
 $('bodyForm').onsubmit = e => {
@@ -1452,7 +1459,7 @@ function spark(pts, unit){
     const [x, y] = xy(q), last = i === pts.length-1;
     const dot = document.createElementNS(SVGNS, 'circle'); dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', last ? 4.5 : 3); dot.setAttribute('class', last ? 'last' : 'pt');
     const hit = document.createElementNS(SVGNS, 'circle'); hit.setAttribute('cx', x); hit.setAttribute('cy', y); hit.setAttribute('r', 10); hit.setAttribute('class', 'hit');
-    const tt = document.createElementNS(SVGNS, 'title'); tt.textContent = `${shortDate(q.d)}: ${fmtVal(unit, q.v)}`; hit.appendChild(tt);
+    const tt = document.createElementNS(SVGNS, 'title'); tt.textContent = `${shortDate(q.d)}: ${fmtVal(unit, q.v)}${q.kb ? ` @ ${q.kb} lb` : ''}`; hit.appendChild(tt);
     svg.append(dot, hit);
   });
   return svg;
@@ -1467,13 +1474,15 @@ function gainTile(label, unit, pts, sub){
   el.querySelector('.eyebrow').textContent = label;
   el.querySelector('b').textContent = fmtVal(unit, last.v);
   el.querySelector('.chg').textContent = pts.length > 1 ? `${change(unit, last.v - first.v)} since ${shortDate(first.d)}` : (sub || `First one, ${shortDate(last.d)}`);
+  // Bell moves: say which bell, and flag a change of bell, since reps at a heavier bell aren't like-for-like.
+  if (last.kb) el.querySelector('.chg').textContent += pts.length > 1 && first.kb && first.kb !== last.kb ? ` · bell ${first.kb} → ${last.kb} lb` : ` · ${last.kb} lb bell`;
   if (pts.length > 1) el.appendChild(spark(pts, unit));
   return el;
 }
 function renderGains(){
   const g = $('gains'); g.textContent = '';
   const series = (arr, k) => arr.filter(x => x[k] != null).sort((a,b) => a.d < b.d ? -1 : 1).map(x => ({d:x.d, v:x[k]}));
-  TESTS.forEach(t => { const pts = series(state.tests, t.k); if (pts.length) g.appendChild(gainTile(t.unit === 's' ? t.name : `${t.name} in 60 s`, t.unit, pts)); });
+  TESTS.forEach(t => { const pts = series(state.tests, t.k); pts.forEach(q => { const x = state.tests.find(y => y.d === q.d); if (kbOf(t, x)) q.kb = kbOf(t, x); }); if (pts.length) g.appendChild(gainTile(t.unit === 's' ? t.name : `${t.name} in 60 s`, t.unit, pts)); });
   [['wt', 'Body weight', 'lb'], ['ws', 'Waist', 'in']].forEach(([k, name, unit]) => { const pts = series(state.body, k); if (pts.length) g.appendChild(gainTile(name, unit, pts)); });
   // AMRAP rounds per routine, from the workout log.
   const am = {};
@@ -1783,21 +1792,26 @@ function finishTest(complete){
   $('fRate').hidden = true; $('fTest').hidden = false; $('fTestMsg').textContent = '';
   $('fTitle').textContent = complete ? 'Test done.' : 'Test ended.';
   $('fText').textContent = 'Check your numbers, then save them. Leave a box empty for a move you skipped.';
-  TESTS.forEach(t => $('ft-' + t.k).value = P.res[t.k] ?? '');
+  TESTS.forEach(t => { $('ft-' + t.k).value = P.res[t.k] ?? ''; if (t.bell) $('fb-' + t.k).value = lastBell(t.k); });
   if (complete){ beep(1320,200); setTimeout(()=>beep(1760,300),220); say('Test complete. Enter your numbers.'); }
 }
-$('fTestGrid').append(...TESTS.map(t => { const l = document.createElement('label'); l.className = 'fld';
-  l.append(`${t.name} · ${t.unit === 's' ? 'seconds' : t.unit}`);
-  const inp = document.createElement('input'); inp.id = 'ft-' + t.k; inp.type = 'number'; inp.inputMode = 'numeric'; inp.min = 0; inp.max = t.max;
-  l.appendChild(inp); return l; }));
+// One row per move: the count, plus the bell's weight beside it for the bell moves.
+const field = (id, text, attrs) => { const l = document.createElement('label'); l.className = 'fld'; l.append(text);
+  const inp = Object.assign(document.createElement('input'), {id, type:'number'}, attrs); l.appendChild(inp); return l; };
+$('fTestGrid').append(...TESTS.map(t => { const row = document.createElement('div'); row.className = 'trow';
+  row.appendChild(field('ft-' + t.k, `${t.name} · ${t.unit === 's' ? 'seconds' : t.unit}`, {inputMode:'numeric', min:0, max:t.max}));
+  if (t.bell) row.appendChild(field('fb-' + t.k, 'Bell · lb', {inputMode:'decimal', min:1, max:200, step:'any'}));
+  return row; }));
 $('fTest').onsubmit = e => {
   e.preventDefault();
   const tk = ymd(today()), entry = {d:tk};
-  TESTS.forEach(t => { const v = parseInt($('ft-' + t.k).value, 10); if (Number.isInteger(v) && v >= 0 && v <= t.max) entry[t.k] = v; });
-  if (Object.keys(entry).length < 2){ $('fTestMsg').textContent = 'Enter at least one number.'; return; }
+  TESTS.forEach(t => { const v = parseInt($('ft-' + t.k).value, 10); if (!(Number.isInteger(v) && v >= 0 && v <= t.max)) return;
+    entry[t.k] = v;
+    const kb = t.bell ? parseFloat($('fb-' + t.k).value) : NaN; if (inRange(kb, 1, 200)) (entry.kb = entry.kb || {})[t.k] = Math.round(kb*10)/10; });
+  if (!TESTS.some(t => entry[t.k] != null)){ $('fTestMsg').textContent = 'Enter at least one number.'; return; }
   const prev = state.tests.filter(x => x.d < tk).sort((a,b) => a.d < b.d ? -1 : 1).pop();
   state.tests = state.tests.filter(x => x.d !== tk).concat(entry); save();
-  const vs = TESTS.filter(t => entry[t.k] != null && prev && prev[t.k] != null).map(t => `${t.name} ${fmtVal(t.unit, prev[t.k])} → ${fmtVal(t.unit, entry[t.k])}`);
+  const vs = TESTS.filter(t => entry[t.k] != null && prev && prev[t.k] != null).map(t => kbOf(t, prev) !== kbOf(t, entry) ? `${t.name} ${testVal(t, prev)} → ${testVal(t, entry)}` : `${t.name} ${fmtVal(t.unit, prev[t.k])} → ${testVal(t, entry)}`);
   $('fTestMsg').textContent = 'Saved. ' + (vs.length ? `Since ${shortDate(prev.d)}: ${vs.join(' · ')}.` : 'This is your starting point; the next test is in 4 weeks.');
 };
 function nextPlannedLine(){ const t = today(); t.setDate(t.getDate()+1); const d = nextPlannedDate(t); const n = nextWorkout();
